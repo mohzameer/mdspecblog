@@ -1,0 +1,211 @@
+<!DOCTYPE html><html lang="en" class="h-full"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="canonical" href="https://blog.mdspec.dev/blog/sync-md-files-to-s3/"><meta name="description" content="S3 is an ideal archive and distribution layer for engineering docs — durable, cheap, and searchable. Here's how to sync from your repo with minimal setup, using mdspec or a native Actions approach."><meta property="og:title" content="The Easiest Way to Sync Markdown Files to S3 from GitHub — mdspec blog"><meta property="og:description" content="S3 is an ideal archive and distribution layer for engineering docs — durable, cheap, and searchable. Here's how to sync from your repo with minimal setup, using mdspec or a native Actions approach."><meta property="og:type" content="website"><meta property="og:url" content="https://blog.mdspec.dev/blog/sync-md-files-to-s3/"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="The Easiest Way to Sync Markdown Files to S3 from GitHub — mdspec blog"><meta name="twitter:description" content="S3 is an ideal archive and distribution layer for engineering docs — durable, cheap, and searchable. Here's how to sync from your repo with minimal setup, using mdspec or a native Actions approach."><title>The Easiest Way to Sync Markdown Files to S3 from GitHub — mdspec blog</title><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="alternate" type="application/rss+xml" title="mdspec blog RSS feed" href="/rss.xml"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="/_astro/_slug_.DRWnrgDx.css">
+<link rel="stylesheet" href="/_astro/_slug_.DJeLDiMK.css"></head> <body class="min-h-full flex flex-col bg-background"> <!-- Prevent flash of wrong theme --> <script>
+      (function () {
+        const stored = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (stored === 'dark' || (!stored && prefersDark)) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script> <header class="sticky top-0 z-50 w-full border-b border-border/60 bg-background/80 backdrop-blur-sm"> <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8"> <div class="flex h-14 items-center justify-between"> <a href="/" class="flex items-center gap-2.5 group"> <span class="h-6 w-6 rounded bg-foreground flex items-center justify-center"> <span class="text-background text-xs font-bold font-mono">M</span> </span> <span class="font-semibold text-sm tracking-tight">mdspec blog</span> </a> <nav class="flex items-center gap-1"> <a href="/" class="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-accent">Articles</a> <a href="https://mdspecr2-web.vercel.app" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-accent">mdspec →</a> <button id="theme-toggle" aria-label="Toggle dark mode" class="ml-1 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"> <!-- Sun icon (shown in dark mode) --> <svg id="icon-sun" class="hidden w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <circle cx="12" cy="12" r="5"></circle> <path stroke-linecap="round" d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path> </svg> <!-- Moon icon (shown in light mode) --> <svg id="icon-moon" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path> </svg> </button> </nav> </div> </div> </header> <script>
+      (function () {
+        function updateIcons() {
+          const isDark = document.documentElement.classList.contains('dark');
+          document.getElementById('icon-sun').classList.toggle('hidden', !isDark);
+          document.getElementById('icon-moon').classList.toggle('hidden', isDark);
+        }
+        updateIcons();
+        document.getElementById('theme-toggle').addEventListener('click', function () {
+          const isDark = document.documentElement.classList.toggle('dark');
+          localStorage.setItem('theme', isDark ? 'dark' : 'light');
+          updateIcons();
+        });
+      })();
+    </script> <main class="flex-1">  <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16"> <div class="mb-10"> <a href="/" class="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8 group"> <svg class="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"> <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"></path> </svg>
+All articles
+</a> <div class="flex flex-wrap gap-2 mb-5"> <a href="/tag/s3" class="inline-block whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-medium leading-none bg-secondary text-secondary-foreground border border-border hover:border-foreground/40 transition-colors"> S3 </a><a href="/tag/github" class="inline-block whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-medium leading-none bg-secondary text-secondary-foreground border border-border hover:border-foreground/40 transition-colors"> GitHub </a><a href="/tag/ci-cd" class="inline-block whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-medium leading-none bg-secondary text-secondary-foreground border border-border hover:border-foreground/40 transition-colors"> CI/CD </a><a href="/tag/documentation" class="inline-block whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-medium leading-none bg-secondary text-secondary-foreground border border-border hover:border-foreground/40 transition-colors"> Documentation </a><a href="/tag/infrastructure" class="inline-block whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-medium leading-none bg-secondary text-secondary-foreground border border-border hover:border-foreground/40 transition-colors"> Infrastructure </a> </div> <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-foreground mb-5 leading-tight"> The Easiest Way to Sync Markdown Files to S3 from GitHub </h1> <p class="text-lg text-muted-foreground leading-relaxed mb-8"> S3 is an ideal archive and distribution layer for engineering docs — durable, cheap, and searchable. Here&#39;s how to sync from your repo with minimal setup, using mdspec or a native Actions approach. </p> <div class="flex items-center gap-4 pt-5 border-t border-border"> <div class="h-9 w-9 rounded-full bg-secondary border border-border flex items-center justify-center text-sm font-semibold text-muted-foreground"> M </div> <div class="flex flex-col"> <span class="text-sm font-medium text-foreground">mdspec team</span> <span class="text-xs text-muted-foreground"> March 19, 2026 <span> · 6 min read</span> </span> </div> </div> </div> <hr class="border-border mb-10"> <div class="prose max-w-none">  <p>S3 might not be the most glamorous destination for engineering documentation, but it’s quietly one of the most powerful.</p>
+<p>Think about what you get: durability (11 nines), versioning, access logs, a dead-simple HTTP API, integration with every AWS service imaginable, and per-GB pricing that makes storage cost essentially zero for docs.</p>
+<p>For teams building their documentation infrastructure, S3 as an archival and distribution layer solves a lot of problems:</p>
+<ul>
+<li>Archive AI-generated analysis and meeting notes out of the git repo</li>
+<li>Give non-engineers read access to specs without GitHub access</li>
+<li>Feed documentation into RAG pipelines via S3 data sources</li>
+<li>Store the canonical versions of large reference documents that would bloat git history</li>
+<li>Serve documentation as a static site via CloudFront</li>
+</ul>
+<p>Here’s how to get your markdown files from your GitHub repo into S3 cleanly.</p>
+<h2 id="option-1-the-native-github-actions-approach">Option 1: The Native GitHub Actions Approach</h2>
+<p>If you want direct control and don’t mind a few lines of YAML, the AWS CLI in GitHub Actions is the most transparent solution.</p>
+<h3 id="setup">Setup</h3>
+<p><strong>1. Create an IAM policy</strong> with minimal permissions:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#79B8FF">  "Version"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"2012-10-17"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">  "Statement"</span><span style="color:#E1E4E8">: [</span></span>
+<span class="line"><span style="color:#E1E4E8">    {</span></span>
+<span class="line"><span style="color:#79B8FF">      "Effect"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"Allow"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">      "Action"</span><span style="color:#E1E4E8">: [</span></span>
+<span class="line"><span style="color:#9ECBFF">        "s3:PutObject"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#9ECBFF">        "s3:GetObject"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#9ECBFF">        "s3:ListBucket"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#9ECBFF">        "s3:DeleteObject"</span></span>
+<span class="line"><span style="color:#E1E4E8">      ],</span></span>
+<span class="line"><span style="color:#79B8FF">      "Resource"</span><span style="color:#E1E4E8">: [</span></span>
+<span class="line"><span style="color:#9ECBFF">        "arn:aws:s3:::your-docs-bucket"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#9ECBFF">        "arn:aws:s3:::your-docs-bucket/*"</span></span>
+<span class="line"><span style="color:#E1E4E8">      ]</span></span>
+<span class="line"><span style="color:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#E1E4E8">  ]</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span></code></pre>
+<p><strong>2. Store credentials in GitHub Secrets:</strong></p>
+<ul>
+<li><code>AWS_ACCESS_KEY_ID</code></li>
+<li><code>AWS_SECRET_ACCESS_KEY</code></li>
+<li><code>AWS_REGION</code></li>
+</ul>
+<p>Or, better: configure OIDC-based authentication so no long-lived credentials exist:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#E1E4E8">- </span><span style="color:#85E89D">name</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">Configure AWS credentials</span></span>
+<span class="line"><span style="color:#85E89D">  uses</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">aws-actions/configure-aws-credentials@v4</span></span>
+<span class="line"><span style="color:#85E89D">  with</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">    role-to-assume</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">arn:aws:iam::123456789:role/GithubActionsDocsSync</span></span>
+<span class="line"><span style="color:#85E89D">    aws-region</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">us-east-1</span></span>
+<span class="line"></span></code></pre>
+<p><strong>3. The workflow:</strong></p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#85E89D">name</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">Sync docs to S3</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF">on</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">  push</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">    branches</span><span style="color:#E1E4E8">: [</span><span style="color:#9ECBFF">main</span><span style="color:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#85E89D">    paths</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#E1E4E8">      - </span><span style="color:#9ECBFF">'docs/**'</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#85E89D">jobs</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">  sync</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">    runs-on</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">ubuntu-latest</span></span>
+<span class="line"><span style="color:#85E89D">    permissions</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">      id-token</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">write</span></span>
+<span class="line"><span style="color:#85E89D">      contents</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">read</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#85E89D">    steps</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#E1E4E8">      - </span><span style="color:#85E89D">uses</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">actions/checkout@v4</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">      - </span><span style="color:#85E89D">name</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">Configure AWS credentials</span></span>
+<span class="line"><span style="color:#85E89D">        uses</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">aws-actions/configure-aws-credentials@v4</span></span>
+<span class="line"><span style="color:#85E89D">        with</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">          role-to-assume</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">${{ secrets.AWS_ROLE_ARN }}</span></span>
+<span class="line"><span style="color:#85E89D">          aws-region</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">us-east-1</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">      - </span><span style="color:#85E89D">name</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">Sync docs to S3</span></span>
+<span class="line"><span style="color:#85E89D">        run</span><span style="color:#E1E4E8">: </span><span style="color:#F97583">|</span></span>
+<span class="line"><span style="color:#9ECBFF">          aws s3 sync docs/ s3://your-docs-bucket/docs/ \</span></span>
+<span class="line"><span style="color:#9ECBFF">            --include "*.md" \</span></span>
+<span class="line"><span style="color:#9ECBFF">            --delete \</span></span>
+<span class="line"><span style="color:#9ECBFF">            --metadata-directive REPLACE \</span></span>
+<span class="line"><span style="color:#9ECBFF">            --content-type "text/markdown; charset=utf-8"</span></span>
+<span class="line"></span></code></pre>
+<p>The <code>--delete</code> flag removes files from S3 that no longer exist in the repo. The <code>paths:</code> filter ensures the workflow only runs when docs actually change.</p>
+<h3 id="limitations-of-the-native-approach">Limitations of the native approach</h3>
+<p>This works well for bulk syncs. It has some gaps if you want more granular control:</p>
+<ul>
+<li>It syncs all files in the directory, not just changed ones (slow for large doc trees)</li>
+<li>No frontmatter parsing — metadata from your markdown won’t be stored as S3 object metadata</li>
+<li>No multi-destination support — you’d need separate steps for S3 + Notion + Confluence</li>
+<li>No alias system for human-readable destination mapping</li>
+</ul>
+<hr>
+<h2 id="option-2-s3-sync-via-mdspec">Option 2: S3 Sync via mdspec</h2>
+<p><a href="https://mdspecr2-web.vercel.app">mdspec</a> includes S3 as a first-class integration alongside Notion, Confluence, and ClickUp.</p>
+<p>The key differences from the raw AWS CLI approach:</p>
+<p><strong>Change detection.</strong> mdspec uses <code>git diff</code> to identify only the files that changed in a given push. If your <code>docs/</code> directory has 200 files and 3 changed, only 3 files are uploaded. This is significantly faster for large doc trees and reduces unnecessary S3 API calls.</p>
+<p><strong>Frontmatter as metadata.</strong> mdspec parses your markdown frontmatter and stores it as S3 object metadata. This means your <code>title</code>, <code>tags</code>, <code>author</code>, and <code>date</code> fields are stored alongside the file and queryable without downloading the content.</p>
+<p><strong>Unified config.</strong> The same <code>.mdspecmap</code> file that controls your Notion sync also controls your S3 sync. You don’t maintain separate workflows for separate destinations.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#6A737D"># .mdspecmap</span></span>
+<span class="line"><span style="color:#85E89D">mappings</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#E1E4E8">  - </span><span style="color:#85E89D">folder</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">docs/specs</span></span>
+<span class="line"><span style="color:#85E89D">    integration</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">notion</span></span>
+<span class="line"><span style="color:#85E89D">    parent</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">engineering-docs</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">  - </span><span style="color:#85E89D">folder</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">docs/archive</span></span>
+<span class="line"><span style="color:#85E89D">    integration</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">s3</span></span>
+<span class="line"><span style="color:#85E89D">    bucket</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">acme-engineering-docs</span></span>
+<span class="line"><span style="color:#85E89D">    prefix</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">archive/specs</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">  - </span><span style="color:#85E89D">folder</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">docs/decisions</span></span>
+<span class="line"><span style="color:#85E89D">    integration</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">s3</span></span>
+<span class="line"><span style="color:#85E89D">    bucket</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">acme-engineering-docs</span></span>
+<span class="line"><span style="color:#85E89D">    prefix</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">architecture/decisions</span></span>
+<span class="line"></span></code></pre>
+<p><strong>One workflow step:</strong></p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#E1E4E8">- </span><span style="color:#85E89D">name</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">Publish specs</span></span>
+<span class="line"><span style="color:#85E89D">  run</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">npx mdspeci publish --project ${{ vars.MDSPEC_PROJECT_ID }}</span></span>
+<span class="line"><span style="color:#85E89D">  env</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">    MDSPEC_TOKEN</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">${{ secrets.MDSPEC_TOKEN }}</span></span>
+<span class="line"></span></code></pre>
+<p>This replaces separate sync steps for each destination — one command handles all configured integrations simultaneously.</p>
+<hr>
+<h2 id="a-note-on-s3-key-structure">A Note on S3 Key Structure</h2>
+<p>Whether you use the AWS CLI or mdspec, think carefully about your S3 key structure before you start syncing. It’s hard to reorganize later.</p>
+<p>A good convention for engineering docs:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>s3://your-bucket/</span></span>
+<span class="line"><span>  docs/</span></span>
+<span class="line"><span>    specs/           ← synced from docs/specs/</span></span>
+<span class="line"><span>      auth.md</span></span>
+<span class="line"><span>      payment.md</span></span>
+<span class="line"><span>    decisions/       ← synced from docs/decisions/</span></span>
+<span class="line"><span>      001-redis-sessions.md</span></span>
+<span class="line"><span>    archive/         ← AI analysis, one-off reports</span></span>
+<span class="line"><span>      2026-q1/</span></span>
+<span class="line"><span>        rate-limit-analysis.md</span></span>
+<span class="line"><span></span></span></code></pre>
+<p>Consider also enabling <strong>S3 Versioning</strong> on your docs bucket. It costs almost nothing and gives you the full history of every document — useful if you ever need to recover a previous version of a spec.</p>
+<hr>
+<h2 id="making-s3-docs-searchable">Making S3 Docs Searchable</h2>
+<p>Raw S3 files aren’t natively searchable in the way Confluence or Notion are. If you want semantic search over your S3 docs, a few options:</p>
+<p><strong>S3 + OpenSearch:</strong> Set up an S3 event notification that triggers a Lambda on object creation/update, which indexes the file into OpenSearch. Full-text and semantic search with high control, significant setup.</p>
+<p><strong>S3 + Kendra:</strong> AWS Kendra has native S3 data source connectors and provides semantic search with minimal setup. More expensive than the Lambda approach.</p>
+<p><strong>RAG pipeline:</strong> Sync S3 files into a vector store (Pinecone, Weaviate, pgvector) for use in AI-assisted search. This is increasingly the preferred approach for teams building internal AI tooling.</p>
+<p>For most teams, the path of least resistance is to use S3 for archival + raw access, and sync the active living specs to a tool like Notion or Confluence that provides built-in search.</p>
+<hr>
+<h2 id="when-to-use-each-approach">When to Use Each Approach</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Use case</th><th>Recommended approach</th></tr></thead><tbody><tr><td>Quick sync of a small doc tree</td><td>AWS CLI in GitHub Actions</td></tr><tr><td>Multiple destinations (S3 + Notion + Confluence)</td><td>mdspec</td></tr><tr><td>Large doc tree (100+ files)</td><td>mdspec (change detection)</td></tr><tr><td>Frontmatter as S3 metadata</td><td>mdspec</td></tr><tr><td>Full control over IAM/permissions</td><td>AWS CLI</td></tr><tr><td>Archiving AI-generated files with no other sync needs</td><td>AWS CLI</td></tr></tbody></table>
+<p>Both approaches are valid. The AWS CLI approach is transparent and dependency-free. mdspec is more capable when you have multiple sync destinations or want change-aware publishing.</p>
+<p>Start with what fits your current needs. The infrastructure will grow with you.</p>  </div> <div class="mt-16 pt-8 border-t border-border"> <div class="bg-secondary/50 border border-border rounded-lg p-6"> <div class="flex items-start gap-4"> <div class="h-8 w-8 rounded bg-foreground flex items-center justify-center shrink-0 mt-0.5"> <span class="text-background text-xs font-bold font-mono">M</span> </div> <div> <h3 class="font-semibold text-foreground mb-1.5">Ship specs. Stay in flow.</h3> <p class="text-sm text-muted-foreground mb-4">
+mdspec syncs your markdown specs to Notion, Confluence, ClickUp, and S3 — straight from CI. Two files, one step, zero friction.
+</p> <a href="https://mdspecr2-web.vercel.app" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-sm font-medium bg-foreground text-background px-4 py-2 rounded-md hover:opacity-90 transition-opacity">
+Get started free
+<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"> <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path> </svg> </a> </div> </div> </div> </div> </article>  </main> <footer class="border-t border-border/60 mt-24"> <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10"> <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"> <div class="flex items-center gap-2.5"> <span class="h-5 w-5 rounded bg-foreground flex items-center justify-center"> <span class="text-background text-[10px] font-bold font-mono">M</span> </span> <span class="text-sm font-medium">mdspec blog</span> </div> <p class="text-sm text-muted-foreground">
+Developer insights on specs, AI workflows, and documentation tooling. &nbsp;·&nbsp;
+<a href="https://mdspecr2-web.vercel.app" target="_blank" rel="noopener noreferrer" class="underline underline-offset-4 hover:text-foreground transition-colors">mdspec.dev</a> </p> </div> </div> </footer> </body></html>

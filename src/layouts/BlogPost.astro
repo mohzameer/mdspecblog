@@ -1,0 +1,99 @@
+---
+import Base from './Base.astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+const { title, description, pubDate, author, tags, readingTime } = post.data;
+
+const formattedDate = new Intl.DateTimeFormat('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+}).format(pubDate);
+---
+
+<Base title={`${title} — mdspec blog`} description={description}>
+  <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+
+    <div class="mb-10">
+      <a
+        href="/"
+        class="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8 group"
+      >
+        <svg class="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+        </svg>
+        All articles
+      </a>
+
+      <div class="flex flex-wrap gap-2 mb-5">
+        {tags.map((tag) => (
+          <a
+            href={`/tag/${tag.toLowerCase().replace(/[\s\/]+/g, '-')}`}
+            class="inline-block whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-medium leading-none bg-secondary text-secondary-foreground border border-border hover:border-foreground/40 transition-colors"
+          >
+            {tag}
+          </a>
+        ))}
+      </div>
+
+      <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-foreground mb-5 leading-tight">
+        {title}
+      </h1>
+      <p class="text-lg text-muted-foreground leading-relaxed mb-8">
+        {description}
+      </p>
+
+      <div class="flex items-center gap-4 pt-5 border-t border-border">
+        <div class="h-9 w-9 rounded-full bg-secondary border border-border flex items-center justify-center text-sm font-semibold text-muted-foreground">
+          {author.charAt(0).toUpperCase()}
+        </div>
+        <div class="flex flex-col">
+          <span class="text-sm font-medium text-foreground">{author}</span>
+          <span class="text-xs text-muted-foreground">
+            {formattedDate}
+            {readingTime && <span> · {readingTime}</span>}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <hr class="border-border mb-10" />
+
+    <div class="prose max-w-none">
+      <slot />
+    </div>
+
+    <div class="mt-16 pt-8 border-t border-border">
+      <div class="bg-secondary/50 border border-border rounded-lg p-6">
+        <div class="flex items-start gap-4">
+          <div class="h-8 w-8 rounded bg-foreground flex items-center justify-center shrink-0 mt-0.5">
+            <span class="text-background text-xs font-bold font-mono">M</span>
+          </div>
+          <div>
+            <h3 class="font-semibold text-foreground mb-1.5">Ship specs. Stay in flow.</h3>
+            <p class="text-sm text-muted-foreground mb-4">
+              mdspec syncs your markdown specs to Notion, Confluence, ClickUp, and S3 — straight from CI. Two files, one step, zero friction.
+            </p>
+            <a
+              href="https://mdspecr2-web.vercel.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-1.5 text-sm font-medium bg-foreground text-background px-4 py-2 rounded-md hover:opacity-90 transition-opacity"
+            >
+              Get started free
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </article>
+</Base>

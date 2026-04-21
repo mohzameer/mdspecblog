@@ -1,0 +1,108 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 5.9% 10%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  .prose {
+    @apply text-foreground leading-7;
+  }
+  .prose h1 {
+    @apply text-3xl font-bold tracking-tight text-foreground mb-6 mt-10 first:mt-0;
+  }
+  .prose h2 {
+    @apply text-2xl font-semibold tracking-tight text-foreground mb-4 mt-8;
+  }
+  .prose h3 {
+    @apply text-xl font-semibold text-foreground mb-3 mt-6;
+  }
+  .prose p {
+    @apply mb-5 text-[hsl(var(--muted-foreground))];
+  }
+  .prose a {
+    @apply text-foreground underline underline-offset-4 hover:text-primary transition-colors;
+  }
+  .prose ul {
+    @apply list-disc pl-6 mb-5 space-y-1.5;
+  }
+  .prose ol {
+    @apply list-decimal pl-6 mb-5 space-y-1.5;
+  }
+  .prose li {
+    @apply text-[hsl(var(--muted-foreground))];
+  }
+  .prose blockquote {
+    @apply border-l-4 border-border pl-5 py-1 my-6 text-[hsl(var(--muted-foreground))] italic;
+  }
+  .prose code {
+    @apply text-[hsl(var(--primary))] bg-[hsl(var(--muted))] rounded px-1.5 py-0.5 text-sm font-mono;
+  }
+  .prose pre {
+    @apply bg-[hsl(240_10%_6%)] text-zinc-200 rounded-lg p-5 my-6 overflow-x-auto text-sm leading-6;
+  }
+  .prose pre code {
+    @apply bg-transparent text-inherit p-0;
+  }
+  .prose strong {
+    @apply font-semibold text-foreground;
+  }
+  .prose hr {
+    @apply border-border my-8;
+  }
+}

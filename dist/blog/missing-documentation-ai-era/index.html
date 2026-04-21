@@ -1,0 +1,104 @@
+<!DOCTYPE html><html lang="en" class="h-full"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="canonical" href="https://blog.mdspec.dev/blog/missing-documentation-ai-era/"><meta name="description" content="AI makes developers faster. Much faster. But task documentation hasn't kept up. Here's what's being lost, why it matters, and how to close the gap before it becomes technical debt you can't see."><meta property="og:title" content="The Documentation Gap No One Talks About in AI-Speed Development — mdspec blog"><meta property="og:description" content="AI makes developers faster. Much faster. But task documentation hasn't kept up. Here's what's being lost, why it matters, and how to close the gap before it becomes technical debt you can't see."><meta property="og:type" content="website"><meta property="og:url" content="https://blog.mdspec.dev/blog/missing-documentation-ai-era/"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="The Documentation Gap No One Talks About in AI-Speed Development — mdspec blog"><meta name="twitter:description" content="AI makes developers faster. Much faster. But task documentation hasn't kept up. Here's what's being lost, why it matters, and how to close the gap before it becomes technical debt you can't see."><title>The Documentation Gap No One Talks About in AI-Speed Development — mdspec blog</title><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="alternate" type="application/rss+xml" title="mdspec blog RSS feed" href="/rss.xml"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="/_astro/_slug_.DRWnrgDx.css">
+<link rel="stylesheet" href="/_astro/_slug_.DJeLDiMK.css"></head> <body class="min-h-full flex flex-col bg-background"> <!-- Prevent flash of wrong theme --> <script>
+      (function () {
+        const stored = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (stored === 'dark' || (!stored && prefersDark)) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script> <header class="sticky top-0 z-50 w-full border-b border-border/60 bg-background/80 backdrop-blur-sm"> <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8"> <div class="flex h-14 items-center justify-between"> <a href="/" class="flex items-center gap-2.5 group"> <span class="h-6 w-6 rounded bg-foreground flex items-center justify-center"> <span class="text-background text-xs font-bold font-mono">M</span> </span> <span class="font-semibold text-sm tracking-tight">mdspec blog</span> </a> <nav class="flex items-center gap-1"> <a href="/" class="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-accent">Articles</a> <a href="https://mdspecr2-web.vercel.app" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-accent">mdspec →</a> <button id="theme-toggle" aria-label="Toggle dark mode" class="ml-1 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"> <!-- Sun icon (shown in dark mode) --> <svg id="icon-sun" class="hidden w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <circle cx="12" cy="12" r="5"></circle> <path stroke-linecap="round" d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path> </svg> <!-- Moon icon (shown in light mode) --> <svg id="icon-moon" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path> </svg> </button> </nav> </div> </div> </header> <script>
+      (function () {
+        function updateIcons() {
+          const isDark = document.documentElement.classList.contains('dark');
+          document.getElementById('icon-sun').classList.toggle('hidden', !isDark);
+          document.getElementById('icon-moon').classList.toggle('hidden', isDark);
+        }
+        updateIcons();
+        document.getElementById('theme-toggle').addEventListener('click', function () {
+          const isDark = document.documentElement.classList.toggle('dark');
+          localStorage.setItem('theme', isDark ? 'dark' : 'light');
+          updateIcons();
+        });
+      })();
+    </script> <main class="flex-1">  <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16"> <div class="mb-10"> <a href="/" class="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8 group"> <svg class="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"> <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"></path> </svg>
+All articles
+</a> <div class="flex flex-wrap gap-2 mb-5"> <a href="/tag/ai" class="inline-block whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-medium leading-none bg-secondary text-secondary-foreground border border-border hover:border-foreground/40 transition-colors"> AI </a><a href="/tag/documentation" class="inline-block whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-medium leading-none bg-secondary text-secondary-foreground border border-border hover:border-foreground/40 transition-colors"> Documentation </a><a href="/tag/developer-workflow" class="inline-block whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-medium leading-none bg-secondary text-secondary-foreground border border-border hover:border-foreground/40 transition-colors"> Developer Workflow </a><a href="/tag/technical-debt" class="inline-block whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-medium leading-none bg-secondary text-secondary-foreground border border-border hover:border-foreground/40 transition-colors"> Technical Debt </a> </div> <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-foreground mb-5 leading-tight"> The Documentation Gap No One Talks About in AI-Speed Development </h1> <p class="text-lg text-muted-foreground leading-relaxed mb-8"> AI makes developers faster. Much faster. But task documentation hasn&#39;t kept up. Here&#39;s what&#39;s being lost, why it matters, and how to close the gap before it becomes technical debt you can&#39;t see. </p> <div class="flex items-center gap-4 pt-5 border-t border-border"> <div class="h-9 w-9 rounded-full bg-secondary border border-border flex items-center justify-center text-sm font-semibold text-muted-foreground"> M </div> <div class="flex flex-col"> <span class="text-sm font-medium text-foreground">mdspec team</span> <span class="text-xs text-muted-foreground"> April 3, 2026 <span> · 7 min read</span> </span> </div> </div> </div> <hr class="border-border mb-10"> <div class="prose max-w-none">  <p>There’s a well-understood documentation problem in software: nobody writes it.</p>
+<p>And then there’s the newer, less-discussed problem: AI is making developers <em>so fast</em> that the documentation gap is widening at an unprecedented rate.</p>
+<p>This is the missing documentation crisis of the AI era. Not the absence of documentation for stable, long-running features — teams have processes for that, even if imperfect. The crisis is <strong>task documentation</strong>: the ephemeral, per-feature, per-sprint record of <em>why</em> something was built the way it was, what alternatives were considered, what edge cases were explicitly decided not to handle.</p>
+<p>That context is getting destroyed faster than ever.</p>
+<h2 id="the-speed-problem">The Speed Problem</h2>
+<p>Six months ago, implementing a feature meant: planning session, ticket, backend work, frontend work, PR review, QA, merge. Maybe three weeks.</p>
+<p>Today, with AI-assisted development: ticket, AI-assisted implementation, PR, merge. Maybe three days.</p>
+<p>The code gets written. The feature ships. The developers move on to the next thing.</p>
+<p>What didn’t happen in those three days:</p>
+<ul>
+<li>No ADR capturing why you chose approach A over approach B</li>
+<li>No task notes explaining the edge case you explicitly punted on</li>
+<li>No comment in the spec explaining that the rate limit was deliberately set low for the beta</li>
+<li>No record that the AI suggested five different implementations and you picked the one you did for a specific reason</li>
+</ul>
+<p>In three weeks, there’s enough friction that some of that documentation <em>sometimes</em> gets written — in standup notes, in Slack threads, in a quick Confluence page, somewhere.</p>
+<p>In three days, there’s no such pressure. You ship and move.</p>
+<h2 id="what-task-documentation-actually-is">What Task Documentation Actually Is</h2>
+<p>Let’s be precise. Task documentation isn’t:</p>
+<ul>
+<li>API documentation (that’s what OpenAPI is for)</li>
+<li>Code comments (that’s what comments are for)</li>
+<li>Architecture documentation (that’s ADRs and system diagrams)</li>
+</ul>
+<p>Task documentation is the <em>contextual record of a specific unit of work</em>:</p>
+<blockquote>
+<p><strong>Feature: User rate limiting (v1)</strong></p>
+<p>Implemented per-user rate limiting on the API gateway. 100 req/minute per user, per endpoint group.</p>
+<p><strong>Why 100?</strong> Chosen conservatively for beta. Expect to raise after analyzing usage patterns in Q2.</p>
+<p><strong>Considered and rejected:</strong></p>
+<ul>
+<li>Token bucket per IP: rejected because corporate NAT would cause false positives</li>
+<li>Redis-based distributed limiting: deferred due to infra complexity; revisited if needed</li>
+</ul>
+<p><strong>Known limitation:</strong> Limits don’t apply to internal service-to-service calls. This is intentional for now — internal abuse monitoring is handled separately.</p>
+<p><strong>Related tickets:</strong> [PLAT-221], [PLAT-224]</p>
+</blockquote>
+<p>This document has a shelf life of maybe 18 months. But in those 18 months, it’s the difference between a new engineer confidently changing the rate limit and a new engineer introducing a production incident because they didn’t know why it was set that way.</p>
+<h2 id="why-its-getting-worse">Why It’s Getting Worse</h2>
+<p>The problem isn’t new, but several AI-era dynamics are amplifying it:</p>
+<h3 id="1-ai-assisted-code-is-harder-to-reason-about-contextually">1. AI-assisted code is harder to reason about contextually</h3>
+<p>When a human writes code from scratch, they tend to leave implicit context in variable names, comments, and structure. When AI generates code, it’s often clean, idiomatic, and completely opaque about the <em>why</em>. The code works. But why that algorithm? Why that data structure? The AI didn’t leave notes.</p>
+<h3 id="2-the-decision-surface-is-larger">2. The decision surface is larger</h3>
+<p>AI presents options rapidly. A developer in a chat session might evaluate three different approaches, ask the AI to compare them, decide on one, and implement it — all in an hour. All that decision-making context exists only in the chat history, which is ephemeral.</p>
+<h3 id="3-team-knowledge-degrades-faster">3. Team knowledge degrades faster</h3>
+<p>When AI is involved in the implementation, the original developer often doesn’t have as deep a mental model of the code as they would if they’d written every line by hand. Six months later, the code is opaque to <em>everyone</em> — the developer who directed its creation and any future maintainer.</p>
+<h2 id="the-human-cost">The Human Cost</h2>
+<p>This isn’t abstract. Here’s what it looks like in practice:</p>
+<p><strong>The onboarding slowdown.</strong> New engineers hit a wall when they encounter code with no context. Why is this class structured this way? Why does this service communicate via polling instead of events? Why is this check in this order? Without task docs, the answer is always “go ask the person who built it” — which doesn’t scale.</p>
+<p><strong>The bug investigation tax.</strong> Investigating a bug in undocumented code takes 3–5x longer than in documented code, because you have to reverse-engineer intent before you can assess impact. “Is this behavior intentional or a bug?” is an unanswerable question without context.</p>
+<p><strong>The wrong-direction refactor.</strong> A developer refactors code to remove what looks like unnecessary complexity, not knowing that the complexity was intentional — a workaround for a specific third-party API behavior that will reassert itself after the refactor. Task docs would have prevented this.</p>
+<h2 id="practical-solutions">Practical Solutions</h2>
+<h3 id="write-the-why-during-implementation-not-after">Write the “why” during implementation, not after</h3>
+<p>The best time to write task documentation is when you’re making the decisions, not after. Keep a scratchpad doc open alongside your implementation. As you hit decision points, note them. Takes 5–10 minutes per feature. Pays back in hours.</p>
+<h3 id="capture-ai-discussion-context">Capture AI discussion context</h3>
+<p>If you made an architectural decision in a conversation with an AI assistant, <strong>that conversation is documentation</strong>. Don’t let it evaporate. Copy the relevant exchange, clean it up, save it as a markdown file. We’ll write more about this in a follow-up post — but the principle is simple: if it informed a decision, it belongs in the record.</p>
+<h3 id="make-it-a-pr-requirement">Make it a PR requirement</h3>
+<p>Add a <code>## Implementation notes</code> section to your PR template with prompts:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="markdown"><code><span class="line"><span style="color:#79B8FF;font-weight:bold">## Implementation notes</span></span>
+<span class="line"><span style="color:#FFAB70">-</span><span style="color:#E1E4E8;font-weight:bold"> **Approach taken:**</span><span style="color:#E1E4E8"> </span></span>
+<span class="line"><span style="color:#FFAB70">-</span><span style="color:#E1E4E8;font-weight:bold"> **Alternatives considered:**</span><span style="color:#E1E4E8"> </span></span>
+<span class="line"><span style="color:#FFAB70">-</span><span style="color:#E1E4E8;font-weight:bold"> **Known limitations / explicitly deferred work:**</span><span style="color:#E1E4E8"> </span></span>
+<span class="line"><span style="color:#FFAB70">-</span><span style="color:#E1E4E8;font-weight:bold"> **Anything future maintainers should know:**</span><span style="color:#E1E4E8"> </span></span>
+<span class="line"></span></code></pre>
+<p>It takes two minutes to fill out. The PR review is the forcing function.</p>
+<h3 id="store-task-docs-with-the-code">Store task docs with the code</h3>
+<p>Don’t send task docs to a Confluence page that will drift from the code. Store them in the repo, in a <code>docs/tasks/</code> or <code>docs/decisions/</code> directory. Version-controlled, searchable by engineers, accessible to AI tooling.</p>
+<p>Then sync them out to wherever your team reads docs — so they’re accessible to PMs, support, and others without requiring a GitHub login.</p>
+<h2 id="the-compounding-value">The Compounding Value</h2>
+<p>Here’s the thing about task documentation: it compounds.</p>
+<p>A codebase with six months of consistent task docs is dramatically more legible than one without. Every new engineer has an answer to “why.” Every investigation has a starting point. Every AI assistant working on the codebase has better context, which means better output.</p>
+<p>The investment is small. The return is large. And unlike code, documentation doesn’t require refactoring — it just needs to be written.</p>
+<p>Start with the next feature. Write the why.</p>  </div> <div class="mt-16 pt-8 border-t border-border"> <div class="bg-secondary/50 border border-border rounded-lg p-6"> <div class="flex items-start gap-4"> <div class="h-8 w-8 rounded bg-foreground flex items-center justify-center shrink-0 mt-0.5"> <span class="text-background text-xs font-bold font-mono">M</span> </div> <div> <h3 class="font-semibold text-foreground mb-1.5">Ship specs. Stay in flow.</h3> <p class="text-sm text-muted-foreground mb-4">
+mdspec syncs your markdown specs to Notion, Confluence, ClickUp, and S3 — straight from CI. Two files, one step, zero friction.
+</p> <a href="https://mdspecr2-web.vercel.app" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-sm font-medium bg-foreground text-background px-4 py-2 rounded-md hover:opacity-90 transition-opacity">
+Get started free
+<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"> <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path> </svg> </a> </div> </div> </div> </div> </article>  </main> <footer class="border-t border-border/60 mt-24"> <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10"> <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"> <div class="flex items-center gap-2.5"> <span class="h-5 w-5 rounded bg-foreground flex items-center justify-center"> <span class="text-background text-[10px] font-bold font-mono">M</span> </span> <span class="text-sm font-medium">mdspec blog</span> </div> <p class="text-sm text-muted-foreground">
+Developer insights on specs, AI workflows, and documentation tooling. &nbsp;·&nbsp;
+<a href="https://mdspecr2-web.vercel.app" target="_blank" rel="noopener noreferrer" class="underline underline-offset-4 hover:text-foreground transition-colors">mdspec.dev</a> </p> </div> </div> </footer> </body></html>

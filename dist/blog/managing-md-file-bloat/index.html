@@ -1,0 +1,148 @@
+<!DOCTYPE html><html lang="en" class="h-full"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="canonical" href="https://blog.mdspec.dev/blog/managing-md-file-bloat/"><meta name="description" content="AI workflows generate markdown fast. ADRs, specs, meeting notes, agent outputs — it piles up. Here's how to sync it out, keep it searchable, and stop the sprawl."><meta property="og:title" content="Managing Markdown Bloat in AI-Era Repos — mdspec blog"><meta property="og:description" content="AI workflows generate markdown fast. ADRs, specs, meeting notes, agent outputs — it piles up. Here's how to sync it out, keep it searchable, and stop the sprawl."><meta property="og:type" content="website"><meta property="og:url" content="https://blog.mdspec.dev/blog/managing-md-file-bloat/"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Managing Markdown Bloat in AI-Era Repos — mdspec blog"><meta name="twitter:description" content="AI workflows generate markdown fast. ADRs, specs, meeting notes, agent outputs — it piles up. Here's how to sync it out, keep it searchable, and stop the sprawl."><title>Managing Markdown Bloat in AI-Era Repos — mdspec blog</title><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="alternate" type="application/rss+xml" title="mdspec blog RSS feed" href="/rss.xml"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="/_astro/_slug_.DRWnrgDx.css">
+<link rel="stylesheet" href="/_astro/_slug_.DJeLDiMK.css"></head> <body class="min-h-full flex flex-col bg-background"> <!-- Prevent flash of wrong theme --> <script>
+      (function () {
+        const stored = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (stored === 'dark' || (!stored && prefersDark)) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script> <header class="sticky top-0 z-50 w-full border-b border-border/60 bg-background/80 backdrop-blur-sm"> <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8"> <div class="flex h-14 items-center justify-between"> <a href="/" class="flex items-center gap-2.5 group"> <span class="h-6 w-6 rounded bg-foreground flex items-center justify-center"> <span class="text-background text-xs font-bold font-mono">M</span> </span> <span class="font-semibold text-sm tracking-tight">mdspec blog</span> </a> <nav class="flex items-center gap-1"> <a href="/" class="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-accent">Articles</a> <a href="https://mdspecr2-web.vercel.app" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-accent">mdspec →</a> <button id="theme-toggle" aria-label="Toggle dark mode" class="ml-1 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"> <!-- Sun icon (shown in dark mode) --> <svg id="icon-sun" class="hidden w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <circle cx="12" cy="12" r="5"></circle> <path stroke-linecap="round" d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path> </svg> <!-- Moon icon (shown in light mode) --> <svg id="icon-moon" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path> </svg> </button> </nav> </div> </div> </header> <script>
+      (function () {
+        function updateIcons() {
+          const isDark = document.documentElement.classList.contains('dark');
+          document.getElementById('icon-sun').classList.toggle('hidden', !isDark);
+          document.getElementById('icon-moon').classList.toggle('hidden', isDark);
+        }
+        updateIcons();
+        document.getElementById('theme-toggle').addEventListener('click', function () {
+          const isDark = document.documentElement.classList.toggle('dark');
+          localStorage.setItem('theme', isDark ? 'dark' : 'light');
+          updateIcons();
+        });
+      })();
+    </script> <main class="flex-1">  <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16"> <div class="mb-10"> <a href="/" class="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8 group"> <svg class="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"> <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"></path> </svg>
+All articles
+</a> <div class="flex flex-wrap gap-2 mb-5"> <a href="/tag/markdown" class="inline-block whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-medium leading-none bg-secondary text-secondary-foreground border border-border hover:border-foreground/40 transition-colors"> Markdown </a><a href="/tag/ci-cd" class="inline-block whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-medium leading-none bg-secondary text-secondary-foreground border border-border hover:border-foreground/40 transition-colors"> CI/CD </a><a href="/tag/documentation" class="inline-block whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-medium leading-none bg-secondary text-secondary-foreground border border-border hover:border-foreground/40 transition-colors"> Documentation </a><a href="/tag/developer-workflow" class="inline-block whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-medium leading-none bg-secondary text-secondary-foreground border border-border hover:border-foreground/40 transition-colors"> Developer Workflow </a> </div> <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-foreground mb-5 leading-tight"> Managing Markdown Bloat in AI-Era Repos </h1> <p class="text-lg text-muted-foreground leading-relaxed mb-8"> AI workflows generate markdown fast. ADRs, specs, meeting notes, agent outputs — it piles up. Here&#39;s how to sync it out, keep it searchable, and stop the sprawl. </p> <div class="flex items-center gap-4 pt-5 border-t border-border"> <div class="h-9 w-9 rounded-full bg-secondary border border-border flex items-center justify-center text-sm font-semibold text-muted-foreground"> M </div> <div class="flex flex-col"> <span class="text-sm font-medium text-foreground">mdspec team</span> <span class="text-xs text-muted-foreground"> April 10, 2026 <span> · 6 min read</span> </span> </div> </div> </div> <hr class="border-border mb-10"> <div class="prose max-w-none">  <p>There’s a dirty secret in AI-accelerated engineering teams: the repos are getting messy.</p>
+<p>Not with code. With markdown.</p>
+<p>You’ve got ADRs in <code>docs/decisions/</code>. Specs in <code>docs/specs/</code>. Agent-generated summaries in <code>tmp/</code>. Meeting notes someone committed to <code>notes/</code>. AI chat exports in <code>context/</code>. And a README that now references half of these and none of the links work.</p>
+<p>This is <strong>markdown sprawl</strong>, and it’s one of the defining documentation problems of the current moment.</p>
+<h2 id="why-its-happening-faster-than-ever">Why It’s Happening Faster Than Ever</h2>
+<p>A few years ago, documentation was underproduced. Developers hated writing it, so there wasn’t much to manage.</p>
+<p>AI changed the incentives. Writing a spec or an ADR is now fast — you describe what you built to a model and it drafts the document. Running an AI analysis on a PR and exporting the discussion to a markdown file takes 30 seconds. Generating a task summary from a conversation is trivial.</p>
+<p>The friction of <em>writing</em> markdown collapsed. The friction of <em>managing</em> it didn’t.</p>
+<p>You now have:</p>
+<ul>
+<li>Specs that duplicate or contradict each other across versions</li>
+<li>AI-generated docs that were useful once and are now stale noise</li>
+<li>Docs that belong in a project management tool, not a git repo</li>
+<li>Large reference files that slow down repo operations</li>
+<li>Markdown nobody can search because it’s buried in nested directories</li>
+</ul>
+<h2 id="the-two-problem-framework">The Two-Problem Framework</h2>
+<p>Markdown bloat is actually two separate problems that require different solutions:</p>
+<h3 id="problem-1-content-that-belongs-in-the-repo-but-also-needs-to-be-elsewhere">Problem 1: Content that belongs in the repo but also needs to be elsewhere</h3>
+<p>This is your living specs — the authoritative documentation co-located with the code it describes. It <em>should</em> be in the repo. But your PM needs to read it in Confluence. Your designer checks Notion. Your support team uses ClickUp docs.</p>
+<p><strong>Solution:</strong> Sync, don’t duplicate. Keep the repo as the source of truth and push changes to external tools automatically on every merge.</p>
+<h3 id="problem-2-content-that-doesnt-belong-in-the-repo-at-all">Problem 2: Content that doesn’t belong in the repo at all</h3>
+<p>This is ephemeral output — AI analysis exports, meeting notes, one-time agent summaries. It ended up in the repo because that was the path of least resistance, but it creates noise and doesn’t version cleanly.</p>
+<p><strong>Solution:</strong> Route it to a proper destination at creation time. S3 for archival, Notion for team reference, ClickUp for task context.</p>
+<h2 id="a-practical-cleanup-approach">A Practical Cleanup Approach</h2>
+<p>Here’s a process that works for teams that have accumulated significant markdown sprawl:</p>
+<h3 id="audit-and-categorize">Audit and Categorize</h3>
+<p>Run through your doc directories and bucket every file into one of four categories:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Category</th><th>Description</th><th>Action</th></tr></thead><tbody><tr><td><strong>Living spec</strong></td><td>Describes current system behavior</td><td>Keep in repo, set up sync</td></tr><tr><td><strong>Historical reference</strong></td><td>Past decision or analysis, still occasionally useful</td><td>Archive to S3, remove from repo</td></tr><tr><td><strong>Active team resource</strong></td><td>Needed by non-engineers regularly</td><td>Sync to Notion/Confluence, keep thin version in repo</td></tr><tr><td><strong>Dead weight</strong></td><td>Stale, superseded, or never used</td><td>Delete</td></tr></tbody></table>
+<p>Most teams find that 30–40% of their markdown falls into the last category. Delete it without guilt.</p>
+<h3 id="set-up-sync-for-living-docs">Set Up Sync for Living Docs</h3>
+<p>For everything in the “living spec” category, set up automated sync to wherever your team actually reads docs. This is the critical step — it removes the incentive to copy files manually, which is what creates drift in the first place.</p>
+<p>A <code>.mdspecmap</code> file scopes which folders get synced where:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#85E89D">mappings</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#E1E4E8">  - </span><span style="color:#85E89D">folder</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">docs/specs</span></span>
+<span class="line"><span style="color:#85E89D">    integration</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">confluence</span></span>
+<span class="line"><span style="color:#85E89D">    parent</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">engineering-specs</span></span>
+<span class="line"><span style="color:#85E89D">    exclude</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#E1E4E8">      - </span><span style="color:#9ECBFF">"*.draft.md"</span></span>
+<span class="line"><span style="color:#E1E4E8">      - </span><span style="color:#9ECBFF">"tmp/**"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">  - </span><span style="color:#85E89D">folder</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">docs/decisions</span></span>
+<span class="line"><span style="color:#85E89D">    integration</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">notion</span></span>
+<span class="line"><span style="color:#85E89D">    parent</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">architecture-decisions</span></span>
+<span class="line"></span></code></pre>
+<p>Now every push to <code>main</code> syncs changed specs automatically. The repo stays canonical. Confluence and Notion stay current.</p>
+<h3 id="archive-historical-files">Archive Historical Files</h3>
+<p>For files that are historically valuable but don’t need to live in the repo, sync them to S3 with a well-organized key structure and remove them from the repo.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#E1E4E8">  - </span><span style="color:#85E89D">folder</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">docs/archive</span></span>
+<span class="line"><span style="color:#85E89D">    integration</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">s3</span></span>
+<span class="line"><span style="color:#85E89D">    bucket</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">acme-engineering-docs</span></span>
+<span class="line"><span style="color:#85E89D">    prefix</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">archive/2025</span></span>
+<span class="line"></span></code></pre>
+<p>Once synced and verified, commit the deletion. The repo gets lighter. The content is still findable — searchable in S3, indexed in your doc tools.</p>
+<h3 id="establish-a-new-doc-protocol">Establish a “new doc” protocol</h3>
+<p>The only sustainable solution to sprawl is preventing its accumulation. Set a team norm: every new markdown file created in the repo gets categorized immediately and either:</p>
+<ul>
+<li>Placed in a synced folder (living spec)</li>
+<li>Routed directly to its permanent home (not the repo)</li>
+<li>Explicitly marked as temporary with a deletion date in frontmatter</li>
+</ul>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#B392F0">---</span></span>
+<span class="line"><span style="color:#85E89D">title</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"Post-incident analysis: API gateway timeout"</span></span>
+<span class="line"><span style="color:#85E89D">mdspec_skip</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">true</span><span style="color:#6A737D">  # won't be synced</span></span>
+<span class="line"><span style="color:#85E89D">expires</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">2026-03-01</span></span>
+<span class="line"><span style="color:#B392F0">---</span></span>
+<span class="line"></span></code></pre>
+<h2 id="the-s3-archival-pattern">The S3 Archival Pattern</h2>
+<p>For teams that generate a lot of AI analysis, the S3 pattern is particularly useful. You get:</p>
+<ul>
+<li>Durable, versioned storage for every document</li>
+<li>Searchable via S3 Select or Athena</li>
+<li>Accessible without cloning the repo</li>
+<li>No git history bloat from large generated files</li>
+</ul>
+<p>The workflow: AI generates analysis → file saved to a staging folder → CI step syncs to S3 → file deleted from repo in the same commit.</p>
+<h2 id="enter-mdspec">Enter mdspec</h2>
+<p><a href="https://mdspecr2-web.vercel.app">mdspec</a> is built specifically for the “sync, don’t duplicate” workflow. You define which folders map to which integrations in a <code>.mdspecmap</code> file, add one step to your GitHub Actions workflow, and your specs stay current across Notion, Confluence, ClickUp, and S3 without any manual copying.</p>
+<p>The key properties that make it work for managing bloat:</p>
+<ul>
+<li><strong>Change detection via git diff</strong> — only modified files are synced, so large doc folders don’t cause slow CI runs</li>
+<li><strong><code>mdspec_skip</code> frontmatter flag</strong> — lets you explicitly exclude files from sync (perfect for in-progress drafts or ephemeral docs you don’t want published)</li>
+<li><strong>Glob-based exclusions</strong> in <code>.mdspecmap</code> — exclude entire patterns like <code>tmp/**</code> or <code>*.draft.md</code></li>
+<li><strong>S3 integration</strong> — archives docs outside the repo with a clean key structure</li>
+</ul>
+<p>The goal isn’t to manage less documentation. The goal is to be intentional about where each document lives and to make the canonical version always the one in the repo.</p>
+<p>Less sprawl. More signal.</p>  </div> <div class="mt-16 pt-8 border-t border-border"> <div class="bg-secondary/50 border border-border rounded-lg p-6"> <div class="flex items-start gap-4"> <div class="h-8 w-8 rounded bg-foreground flex items-center justify-center shrink-0 mt-0.5"> <span class="text-background text-xs font-bold font-mono">M</span> </div> <div> <h3 class="font-semibold text-foreground mb-1.5">Ship specs. Stay in flow.</h3> <p class="text-sm text-muted-foreground mb-4">
+mdspec syncs your markdown specs to Notion, Confluence, ClickUp, and S3 — straight from CI. Two files, one step, zero friction.
+</p> <a href="https://mdspecr2-web.vercel.app" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-sm font-medium bg-foreground text-background px-4 py-2 rounded-md hover:opacity-90 transition-opacity">
+Get started free
+<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"> <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path> </svg> </a> </div> </div> </div> </div> </article>  </main> <footer class="border-t border-border/60 mt-24"> <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10"> <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"> <div class="flex items-center gap-2.5"> <span class="h-5 w-5 rounded bg-foreground flex items-center justify-center"> <span class="text-background text-[10px] font-bold font-mono">M</span> </span> <span class="text-sm font-medium">mdspec blog</span> </div> <p class="text-sm text-muted-foreground">
+Developer insights on specs, AI workflows, and documentation tooling. &nbsp;·&nbsp;
+<a href="https://mdspecr2-web.vercel.app" target="_blank" rel="noopener noreferrer" class="underline underline-offset-4 hover:text-foreground transition-colors">mdspec.dev</a> </p> </div> </div> </footer> </body></html>

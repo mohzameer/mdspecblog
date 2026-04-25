@@ -117,7 +117,7 @@ This works well for bulk syncs. It has some gaps if you want more granular contr
 
 ## Option 2: S3 Sync via mdspec
 
-[mdspec](https://mdspecr2-web.vercel.app) includes S3 as a first-class integration alongside Notion, Confluence, and ClickUp.
+[mdspec](https://mdspec.dev) includes S3 as a first-class integration alongside Notion, Confluence, and ClickUp.
 
 The key differences from the raw AWS CLI approach:
 

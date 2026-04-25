@@ -128,7 +128,7 @@ The workflow: AI generates analysis → file saved to a staging folder → CI st
 
 ## Enter mdspec
 
-[mdspec](https://mdspecr2-web.vercel.app) is built specifically for the "sync, don't duplicate" workflow. You define which folders map to which integrations in a `.mdspecmap` file, add one step to your GitHub Actions workflow, and your specs stay current across Notion, Confluence, ClickUp, and S3 without any manual copying.
+[mdspec](https://mdspec.dev) is built specifically for the "sync, don't duplicate" workflow. You define which folders map to which integrations in a `.mdspecmap` file, add one step to your GitHub Actions workflow, and your specs stay current across Notion, Confluence, ClickUp, and S3 without any manual copying.
 
 The key properties that make it work for managing bloat:
 

@@ -95,7 +95,7 @@ Given the above, the ideal spec management approach has these properties:
 
 ## mdspec: The Frictionless Alternative
 
-[mdspec](https://mdspecr2-web.vercel.app) is built on exactly this model.
+[mdspec](https://mdspec.dev) is built on exactly this model.
 
 You drop two files into your repo:
 

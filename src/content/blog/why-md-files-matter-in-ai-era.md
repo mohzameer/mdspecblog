@@ -66,7 +66,7 @@ The fundamental problem isn't discipline. It's **distribution**.
 
 ## Where mdspec Fits
 
-This is exactly the gap [mdspec](https://mdspecr2-web.vercel.app) was built to close.
+This is exactly the gap [mdspec](https://mdspec.dev) was built to close.
 
 mdspec is a CI-first spec publishing tool. You write your markdown in the repo — where it belongs, version-controlled and co-located with the code it documents. Then, on every push, mdspec automatically syncs changed files to wherever your team actually reads docs: Notion, Confluence, ClickUp, S3.
 

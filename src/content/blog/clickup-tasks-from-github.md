@@ -113,7 +113,7 @@ This is doable. It's also a few hundred lines of glue code that becomes someone'
 
 ### The mdspec approach
 
-[mdspec](https://mdspecr2-web.vercel.app) solves this directly. It handles the change detection, the mapping, the API calls, the markdown conversion, and the create vs. update logic — out of the box, for ClickUp (and Notion, Confluence, and S3).
+[mdspec](https://mdspec.dev) solves this directly. It handles the change detection, the mapping, the API calls, the markdown conversion, and the create vs. update logic — out of the box, for ClickUp (and Notion, Confluence, and S3).
 
 Your setup looks like this:
 

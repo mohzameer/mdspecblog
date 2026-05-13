@@ -1,7 +1,7 @@
 ---
 title: "mdspec in 5 Minutes: From Zero to Publishing Markdown on Every Merge"
 description: "A screencast-style walkthrough: create a repo, add one .mdspecmap, add the GitHub Actions step, push a commit, see it appear in Confluence or Notion. Real YAML throughout."
-pubDate: 2026-05-09
+pubDate: 2026-05-04
 author: "mdspec team"
 tags: ["mdspec", "GitHub Actions", "Quickstart", "Markdown", "Confluence", "Notion"]
 readingTime: "6 min read"
@@ -18,6 +18,7 @@ No background reading required. If you want the theory first, start with [Spec-a
 - A GitHub repo (any visibility)
 - A Confluence Cloud instance **or** a Notion workspace
 - An API token for whichever you're using (links in Step 2)
+- A free mdspec account at [mdspec.dev](https://mdspec.dev)
 - GitHub Actions enabled on the repo
 
 ---
@@ -53,100 +54,81 @@ That's it. Plain markdown. No special syntax, no proprietary format.
 
 ---
 
-## Step 2: Get Your API Token
+## Step 2: Connect Your Integration in the Dashboard
+
+mdspec stores your destination credentials (Confluence tokens, Notion tokens, etc.) centrally in the dashboard. Your GitHub Actions workflow only ever needs one secret: your mdspec project token.
 
 **For Confluence:**
 
-1. Go to [id.atlassian.com/manage-profile/security/api-tokens](https://id.atlassian.com/manage-profile/security/api-tokens)
-2. Click "Create API token"
-3. Name it something like `mdspec-publish`
-4. Copy the token — you won't see it again
-
-You'll also need:
-- Your Confluence base URL: `https://yourcompany.atlassian.net`
-- Your Atlassian account email address
-- The key of the Confluence space you want to publish to (visible in the space URL)
+1. Go to [id.atlassian.com/manage-profile/security/api-tokens](https://id.atlassian.com/manage-profile/security/api-tokens) and create an API token
+2. In the mdspec Dashboard: go to **Integrations → Confluence → Connect**
+3. Enter your Confluence base URL (e.g. `https://yourcompany.atlassian.net`), your Atlassian email, your API token, and the key of your target space
+4. Create a **parent page alias** — name it something like `engineering-specs` and point it to the Confluence parent page where your specs should appear
 
 **For Notion:**
 
-1. Go to [notion.so/my-integrations](https://www.notion.so/my-integrations)
-2. Click "New integration"
-3. Name it `mdspec`, set it to "Internal integration"
-4. Copy the "Internal Integration Token"
-5. Open the Notion database or page you want to publish to, click "..." → "Connect to" → select your integration
+1. Go to [notion.so/my-integrations](https://www.notion.so/my-integrations), click "New integration", name it `mdspec`, set it to "Internal integration", copy the token
+2. Open the Notion database or page you want to publish to, click "..." → "Connect to" → select your integration
+3. In the mdspec Dashboard: go to **Integrations → Notion → Connect** and enter your integration token
+4. Create a **parent page alias** — name it something like `product-specs` and point it to your Notion database or page
 
 ---
 
-## Step 3: Add Your Secrets to GitHub
+## Step 3: Add Your Token to GitHub
 
-In your repo: Settings → Secrets and variables → Actions → New repository secret
+In the mdspec Dashboard, go to **Project → Settings → Tokens** and generate a project token.
 
-**For Confluence, add three secrets:**
-
-| Secret name | Value |
-|---|---|
-| `CONFLUENCE_BASE_URL` | `https://yourcompany.atlassian.net` |
-| `CONFLUENCE_USER_EMAIL` | your Atlassian email |
-| `CONFLUENCE_API_TOKEN` | the token from Step 2 |
-
-**For Notion, add one secret:**
+In your repo: **Settings → Secrets and variables → Actions → New repository secret**
 
 | Secret name | Value |
 |---|---|
-| `NOTION_TOKEN` | the integration token from Step 2 |
+| `MDSPEC_TOKEN` | your project token from the dashboard |
+
+Also add your project ID as a repository variable (not a secret). Find it at **Dashboard → Project → Settings → Overview**:
+
+**Settings → Secrets and variables → Actions → Variables → New repository variable**
+
+| Variable name | Value |
+|---|---|
+| `MDSPEC_PROJECT_ID` | your project ID |
 
 ---
 
 ## Step 4: Create the `.mdspecmap`
 
-Add `.mdspecmap` to the root of your repo.
+Place a `.mdspecmap` file in the folder you want to sync. The file's location determines its scope — everything in that folder (and its subfolders) will be published according to its mappings.
+
+Create `specs/.mdspecmap`:
 
 **Confluence config:**
 
 ```yaml
 version: 1
-
-sources:
-  - path: specs/auth-service.md
-    destinations:
-      - type: confluence
-        space: ENG
-        parentPage: "Engineering Specs"
-        pageTitle: "Auth Service"
+mappings:
+  - integration: confluence
+    parent: alias:engineering-specs
 ```
 
-Replace `ENG` with your actual space key and `Engineering Specs` with a real parent page title in your space. If the parent page doesn't exist, mdspec will create it.
+`alias:engineering-specs` refers to the parent page alias you created in Step 2. mdspec resolves the alias at publish time and routes each spec to the correct Confluence page.
 
 **Notion config:**
 
 ```yaml
 version: 1
-
-sources:
-  - path: specs/auth-service.md
-    destinations:
-      - type: notion
-        databaseId: "paste-your-database-id-here"
-        pageTitle: "Auth Service"
+mappings:
+  - integration: notion
+    parent: alias:product-specs
 ```
-
-To find your Notion database ID: open the database in Notion, copy the URL. The ID is the 32-character string after the last `/` and before the `?` — looks like `abc1234567890abcdef1234567890abc`.
 
 **Both at once:**
 
 ```yaml
 version: 1
-
-sources:
-  - path: specs/auth-service.md
-    destinations:
-      - type: confluence
-        space: ENG
-        parentPage: "Engineering Specs"
-        pageTitle: "Auth Service"
-      - type: notion
-        databaseId: "your-database-id"
-        pageTitle: "Auth Service"
+mappings:
+  - integration: confluence
+    parent: alias:engineering-specs
+  - integration: notion
+    parent: alias:product-specs
 ```
 
 ---
@@ -155,8 +137,6 @@ sources:
 
 Create `.github/workflows/publish-specs.yml`:
 
-**For Confluence:**
-
 ```yaml
 name: Publish Specs
 
@@ -166,7 +146,6 @@ on:
       - main
     paths:
       - 'specs/**'
-      - '.mdspecmap'
   workflow_dispatch:
 
 jobs:
@@ -175,41 +154,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: mdspec/publish@v1
-        with:
-          map: .mdspecmap
+      - run: npx mdspeci publish --project ${{ vars.MDSPEC_PROJECT_ID }}
         env:
-          CONFLUENCE_BASE_URL: ${{ secrets.CONFLUENCE_BASE_URL }}
-          CONFLUENCE_USER_EMAIL: ${{ secrets.CONFLUENCE_USER_EMAIL }}
-          CONFLUENCE_API_TOKEN: ${{ secrets.CONFLUENCE_API_TOKEN }}
+          MDSPEC_TOKEN: ${{ secrets.MDSPEC_TOKEN }}
+          GITHUB_EVENT_BEFORE: ${{ github.event.before }}
 ```
 
-**For Notion:**
-
-```yaml
-name: Publish Specs
-
-on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'specs/**'
-      - '.mdspecmap'
-  workflow_dispatch:
-
-jobs:
-  publish:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: mdspec/publish@v1
-        with:
-          map: .mdspecmap
-        env:
-          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-```
+> **Note:** The CLI is invoked as `npx mdspeci` — with a trailing `i`. The npm package name is `mdspeci`.
 
 The `workflow_dispatch` trigger lets you run it manually from the Actions UI — useful for the first run.
 
@@ -220,7 +171,7 @@ The `workflow_dispatch` trigger lets you run it manually from the Actions UI —
 Commit everything and push to main:
 
 ```bash
-git add specs/auth-service.md .mdspecmap .github/workflows/publish-specs.yml
+git add specs/auth-service.md specs/.mdspecmap .github/workflows/publish-specs.yml
 git commit -m "add spec publishing pipeline"
 git push origin main
 ```
@@ -230,8 +181,8 @@ Go to your repo's Actions tab. You should see "Publish Specs" running. Click int
 A successful run looks like:
 
 ```
-Reading .mdspecmap...
-Publishing specs/auth-service.md → Confluence (ENG / Engineering Specs / Auth Service)
+Reading specs/.mdspecmap...
+Publishing specs/auth-service.md → confluence (alias:engineering-specs)
   ✓ Page created: https://yourcompany.atlassian.net/wiki/spaces/ENG/pages/123456
 Done. 1 file published to 1 destination.
 ```
@@ -252,42 +203,35 @@ That's spec-as-code working. The markdown in your repo is the source of truth. C
 
 ## Adding More Files
 
-Expand the `.mdspecmap` to cover more specs. You can map individual files or entire folders:
+To publish multiple folders to different destinations, place a `.mdspecmap` in each folder. Each file applies to the folder it lives in and all subfolders.
+
+`specs/.mdspecmap` — routes everything in `specs/` to Backend Services:
 
 ```yaml
 version: 1
-
-sources:
-  - path: specs/auth-service.md
-    destinations:
-      - type: confluence
-        space: ENG
-        parentPage: "Engineering Specs"
-
-  - path: specs/rate-limiting.md
-    destinations:
-      - type: confluence
-        space: ENG
-        parentPage: "Engineering Specs"
-
-  - path: docs/decisions/
-    destinations:
-      - type: confluence
-        space: ENG
-        parentPage: "Architecture Decisions"
+mappings:
+  - integration: confluence
+    parent: alias:backend-services
 ```
 
-When you point at a folder, mdspec publishes every `.md` file in it, using each file's H1 as the page title.
+`docs/decisions/.mdspecmap` — routes ADRs to a separate Confluence space:
+
+```yaml
+version: 1
+mappings:
+  - integration: confluence
+    parent: alias:architecture-decisions
+```
+
+When you push a change to any `.md` file, mdspec publishes it to the destination declared in the nearest `.mdspecmap` ancestor. New files in a mapped folder are picked up automatically — no config change needed.
 
 ---
 
 ## Common First-Run Issues
 
-**"Space not found"** — Double-check your space key. It's the short code visible in the Confluence space URL (e.g. `yourcompany.atlassian.net/wiki/spaces/ENG` → space key is `ENG`).
+**"Alias not found"** — The alias you referenced in `.mdspecmap` doesn't exist yet in your dashboard. Go to Dashboard → Integrations → [your integration] and create the alias pointing to your target page.
 
-**"Parent page not found"** — Confluence page title lookup is case-sensitive. Copy the exact title from the Confluence UI.
-
-**"403 Forbidden"** — Your API token doesn't have write access to the target space. Check the space permissions in Confluence and ensure your account has "Add Pages" permission.
+**"403 Forbidden"** — Your API token doesn't have write access to the target space. Check space permissions in Confluence and ensure your account has "Add Pages" permission.
 
 **Notion "database not found"** — Make sure you connected your integration to the database (the "Connect to" step in Step 2). Each database needs to be explicitly connected.
 
@@ -297,10 +241,10 @@ When you point at a folder, mdspec publishes every `.md` file in it, using each 
 
 Once your first pipeline is working, the natural next steps:
 
-- **Add S3 as a destination** to make specs machine-readable for AI agents. One block in the config — see [Spec-as-Code](/blog/spec-as-code) for the full pattern.
+- **Add S3 as a destination** to make specs machine-readable for AI agents. Connect your S3 bucket in the dashboard, create a key-prefix alias, and add `- integration: s3` / `parent: alias:docs-bucket` to your `.mdspecmap`. See [Spec-as-Code](/blog/spec-as-code) for the full pattern.
 - **Map your ADRs** in `docs/decisions/` to a Confluence space. See the ADR publishing setup in the [Confluence guide](/blog/markdown-to-confluence-github-actions).
-- **Add ClickUp** if your ops or product team lives there. The setup is the same pattern — one more destination block in `.mdspecmap`.
+- **Add ClickUp** if your ops or product team lives there. Connect ClickUp in the dashboard and add `- integration: clickup` / `parent: alias:ops-runbooks` to your `.mdspecmap`.
 
 ---
 
-*mdspec is available at [mdspec.io](https://mdspec.io). The `mdspec/publish` GitHub Action, the `.mdspecmap` config format, and the multi-destination publishing engine are all part of mdspec.*
+*mdspec is available at [mdspec.dev](https://mdspec.dev). The `.mdspecmap` config format and the multi-destination publishing engine are all part of mdspec.*

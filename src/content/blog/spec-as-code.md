@@ -1,7 +1,7 @@
 ---
 title: "Spec-as-Code: Publishing One Markdown Source to Notion, Confluence, ClickUp, and S3 from a Single Repo"
 description: "Spec-as-code is the missing layer between 'docs as code' and the reality of multi-tool engineering orgs. One markdown source in git. Automatic fan-out to wherever your team actually reads."
-pubDate: 2026-05-09
+pubDate: 2026-04-20
 author: "mdspec team"
 tags: ["Spec-as-Code", "Documentation", "GitHub Actions", "Markdown", "Developer Workflow"]
 readingTime: "10 min read"
@@ -96,60 +96,46 @@ The `.mdspecmap` file is a single configuration file that declares where each sp
 
 Here's a complete example mapping one `/specs/` folder to four destinations:
 
+Place a `.mdspecmap` in each folder you want to sync. The file's location defines its scope.
+
+`specs/.mdspecmap` — routes everything in `specs/` to four destinations simultaneously:
+
 ```yaml
 version: 1
-
-sources:
-  - path: specs/auth-service.md
-    destinations:
-      - type: confluence
-        space: ENG
-        parentPage: "Backend Services"
-      - type: notion
-        databaseId: "abc123..."
-        pageTitle: "Auth Service Spec"
-      - type: clickup
-        listId: "def456..."
-        docName: "Auth Service"
-      - type: s3
-        bucket: docs.yourcompany.com
-        key: specs/auth-service.md
-
-  - path: specs/rate-limiting.md
-    destinations:
-      - type: confluence
-        space: ENG
-        parentPage: "Backend Services"
-      - type: s3
-        bucket: docs.yourcompany.com
-        key: specs/rate-limiting.md
-
-  - path: docs/decisions/
-    destinations:
-      - type: confluence
-        space: ENG
-        parentPage: "Architecture Decisions"
-      - type: notion
-        databaseId: "ghi789..."
-        pageTitle: auto  # uses the markdown H1
+mappings:
+  - integration: confluence
+    parent: alias:backend-services
+  - integration: notion
+    parent: alias:product-specs
+  - integration: clickup
+    parent: alias:ops-runbooks
+  - integration: s3
+    parent: alias:docs-bucket
 ```
 
-The structure is declarative: source path on the left, destination list on the right. You're not writing code. You're not managing page IDs in frontmatter across dozens of files. You're writing a map — once — and letting CI handle the rest.
+`docs/decisions/.mdspecmap` — routes ADRs to their own destinations:
+
+```yaml
+version: 1
+mappings:
+  - integration: confluence
+    parent: alias:architecture-decisions
+  - integration: notion
+    parent: alias:adr-database
+```
+
+Each `alias:` value is a parent page alias configured once in the mdspec dashboard — pointing at the target space, page, database, or S3 prefix. You're not writing code. You're not managing page IDs in frontmatter across dozens of files. You're writing a map — once — and letting CI handle the rest.
 
 ### The CI step
 
 The GitHub Actions step is a single line:
 
 ```yaml
-- uses: mdspec/publish@v1
-  with:
-    map: .mdspecmap
+- uses: actions/checkout@v4
+- run: npx mdspeci publish --project ${{ vars.MDSPEC_PROJECT_ID }}
   env:
-    CONFLUENCE_TOKEN: ${{ secrets.CONFLUENCE_TOKEN }}
-    NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-    CLICKUP_TOKEN: ${{ secrets.CLICKUP_TOKEN }}
-    AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-    AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    MDSPEC_TOKEN: ${{ secrets.MDSPEC_TOKEN }}
+    GITHUB_EVENT_BEFORE: ${{ github.event.before }}
 ```
 
 Wire it to run on push to your main branch and you have spec-as-code: every merged change to a spec file triggers a synchronized publish to every destination declared in the map. Engineers work in git. Everyone else sees current content wherever they already look.

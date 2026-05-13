@@ -1,7 +1,7 @@
 ---
 title: "Spec Drift: Why Your Markdown Files and Your Notion/Confluence Pages Stop Matching (And What to Do About It)"
 description: "Spec drift isn't a discipline problem — it's an architectural one. Here's how to name it, audit for it, and fix it structurally so it stops coming back."
-pubDate: 2026-05-09
+pubDate: 2026-04-17
 author: "mdspec team"
 tags: ["Spec Drift", "Documentation", "Developer Workflow", "Notion", "Confluence"]
 readingTime: "9 min read"
@@ -129,21 +129,16 @@ The pattern that eliminates spec drift structurally is [spec-as-code](/blog/spec
 Instead of maintaining copies manually, you declare a map:
 
 ```yaml
-sources:
-  - path: specs/auth-service.md
-    destinations:
-      - type: confluence
-        space: ENG
-        parentPage: "Backend Services"
-      - type: notion
-        databaseId: "abc123..."
-        pageTitle: "Auth Service Spec"
-      - type: clickup
-        listId: "def456..."
-        docName: "Auth Service"
-      - type: s3
-        bucket: docs.yourcompany.com
-        key: specs/auth-service.md
+version: 1
+mappings:
+  - integration: confluence
+    parent: alias:backend-services
+  - integration: notion
+    parent: alias:product-specs
+  - integration: clickup
+    parent: alias:ops-runbooks
+  - integration: s3
+    parent: alias:docs-bucket
 ```
 
 On every push to main, CI publishes the spec to every declared destination. The engineer who changes `auth-service.md` doesn't have to remember to update Confluence, Notion, or ClickUp. The CI step handles it. Every destination is always as current as the last merged commit.

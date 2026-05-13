@@ -1,7 +1,7 @@
 ---
 title: "Why ClickUp Docs Goes Stale (And How to Sync Markdown from GitHub Automatically)"
 description: "ClickUp's markdown support is broken by design, and every standard integration tool hits the same wall. Here's why — and the one pattern that actually works for syncing specs from GitHub to ClickUp Docs."
-pubDate: 2026-05-09
+pubDate: 2026-04-26
 author: "mdspec team"
 tags: ["ClickUp", "GitHub", "Markdown", "Documentation", "CI/CD"]
 readingTime: "8 min read"
@@ -68,30 +68,25 @@ Here's the approach that works reliably.
 
 **The setup:**
 
-Keep your specs as plain markdown files in a `/specs/` folder in your git repository. Declare the ClickUp destination in a `.mdspecmap` config file at the repo root:
+Keep your specs as plain markdown files in a `/specs/` folder in your git repository. Connect ClickUp in the mdspec dashboard and declare the destination in a `.mdspecmap` placed in each folder you want to sync.
 
+`specs/.mdspecmap`:
 ```yaml
 version: 1
-
-sources:
-  - path: specs/auth-service.md
-    destinations:
-      - type: clickup
-        listId: "your-clickup-list-id"
-        docName: "Auth Service Spec"
-
-  - path: specs/rate-limiting.md
-    destinations:
-      - type: clickup
-        listId: "your-clickup-list-id"
-        docName: "Rate Limiting Policy"
-
-  - path: docs/runbooks/
-    destinations:
-      - type: clickup
-        listId: "ops-runbooks-list-id"
-        docName: auto
+mappings:
+  - integration: clickup
+    parent: alias:specs-doc
 ```
+
+`docs/runbooks/.mdspecmap`:
+```yaml
+version: 1
+mappings:
+  - integration: clickup
+    parent: alias:ops-runbooks
+```
+
+Each `alias:` is a ClickUp Doc alias configured in the mdspec dashboard, pointing at the Doc where pages should appear.
 
 **The GitHub Actions step:**
 
@@ -105,7 +100,6 @@ on:
     paths:
       - 'specs/**'
       - 'docs/runbooks/**'
-      - '.mdspecmap'
 
 jobs:
   publish:
@@ -113,18 +107,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: mdspec/publish@v1
-        with:
-          map: .mdspecmap
+      - run: npx mdspeci publish --project ${{ vars.MDSPEC_PROJECT_ID }}
         env:
-          CLICKUP_TOKEN: ${{ secrets.CLICKUP_TOKEN }}
+          MDSPEC_TOKEN: ${{ secrets.MDSPEC_TOKEN }}
+          GITHUB_EVENT_BEFORE: ${{ github.event.before }}
 ```
 
-**Getting your ClickUp API token:**
+**Connecting ClickUp in the dashboard:**
 
-1. Go to ClickUp → Settings → Apps
-2. Under "API Token," click "Generate" (or copy if you already have one)
-3. Add it to GitHub Secrets as `CLICKUP_TOKEN`
+1. Go to ClickUp → Settings → Apps and copy your Personal API Token
+2. In the mdspec Dashboard: **Integrations → ClickUp → Connect**, enter your token and workspace URL
+3. Create aliases pointing at your target ClickUp Docs
+4. In your GitHub repo: add `MDSPEC_TOKEN` as a secret and `MDSPEC_PROJECT_ID` as a repository variable
 
 **Finding your List ID:**
 
@@ -152,30 +146,26 @@ The structural advantage of the `.mdspecmap` approach is that adding ClickUp doe
 
 If your engineering team reads specs in Confluence, your product team reads in Notion, and your ops team reads runbooks in ClickUp, a single config covers all three:
 
+`specs/.mdspecmap`:
 ```yaml
 version: 1
+mappings:
+  - integration: confluence
+    parent: alias:backend-services
+  - integration: notion
+    parent: alias:product-specs
+  - integration: clickup
+    parent: alias:auth-service-doc
+  - integration: s3
+    parent: alias:docs-bucket
+```
 
-sources:
-  - path: specs/auth-service.md
-    destinations:
-      - type: confluence
-        space: ENG
-        parentPage: "Backend Services"
-      - type: notion
-        databaseId: "product-specs-db-id"
-        pageTitle: "Auth Service"
-      - type: clickup
-        listId: "ops-runbooks-list-id"
-        docName: "Auth Service Runbook"
-      - type: s3
-        bucket: docs.yourcompany.com
-        key: specs/auth-service.md
-
-  - path: docs/runbooks/
-    destinations:
-      - type: clickup
-        listId: "ops-runbooks-list-id"
-        docName: auto
+`docs/runbooks/.mdspecmap`:
+```yaml
+version: 1
+mappings:
+  - integration: clickup
+    parent: alias:ops-runbooks
 ```
 
 One CI step. One push. Four destinations updated. The [spec drift](/blog/spec-drift) problem — where Confluence is one version, Notion is two versions, and ClickUp is three versions behind the source — becomes structurally impossible.

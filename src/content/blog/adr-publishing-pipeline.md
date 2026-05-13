@@ -1,7 +1,7 @@
 ---
 title: "ADR Publishing Pipeline: From Architecture Decision to Confluence in 60 Seconds"
 description: "ADRs die in the repo because only engineers read git. Here's how to wire a pipeline that publishes every merged ADR to Confluence (and Notion) automatically — with a worked .mdspecmap example."
-pubDate: 2026-05-09
+pubDate: 2026-05-13
 author: "mdspec team"
 tags: ["ADR", "Architecture Decision Records", "Confluence", "GitHub Actions", "Documentation"]
 readingTime: "7 min read"
@@ -86,24 +86,22 @@ This template produces a Confluence page that's immediately useful to a non-engi
 
 ### The `.mdspecmap` Config
 
+Place a `.mdspecmap` inside the `docs/decisions/` folder:
+
 ```yaml
 version: 1
-
-sources:
-  - path: docs/decisions/
-    destinations:
-      - type: confluence
-        space: ENG
-        parentPage: "Architecture Decisions"
-      - type: notion
-        databaseId: "your-adr-database-id"
-        pageTitle: auto
+mappings:
+  - integration: confluence
+    parent: alias:architecture-decisions
+  - integration: notion
+    parent: alias:adr-database
 ```
 
 A few things worth noting:
-- `path: docs/decisions/` — pointing at a folder, not individual files. Every `.md` file in that folder gets published. New ADRs are picked up automatically without changing the config.
-- `pageTitle: auto` — mdspec uses the file's H1 as the page title. The `# ADR-004: Introduce Redis...` becomes the Confluence page title.
-- Two destinations in one block — Confluence for engineering and security, Notion for product and leadership. Same source, simultaneous publish.
+- The `.mdspecmap` lives inside `docs/decisions/` — its location defines its scope. Every `.md` file in that folder gets published. New ADRs are picked up automatically without changing the config.
+- mdspec uses each file's H1 as the page title. The `# ADR-004: Introduce Redis...` becomes the Confluence page title automatically.
+- Two mappings — Confluence for engineering and security, Notion for product and leadership. Same source, simultaneous publish.
+- `alias:architecture-decisions` and `alias:adr-database` are parent page aliases configured in your mdspec dashboard, pointing at the target Confluence page and Notion database respectively.
 
 ### The GitHub Actions Workflow
 
@@ -116,7 +114,6 @@ on:
       - main
     paths:
       - 'docs/decisions/**'
-      - '.mdspecmap'
   workflow_dispatch:
 
 jobs:
@@ -125,14 +122,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: mdspec/publish@v1
-        with:
-          map: .mdspecmap
+      - run: npx mdspeci publish --project ${{ vars.MDSPEC_PROJECT_ID }}
         env:
-          CONFLUENCE_BASE_URL: ${{ secrets.CONFLUENCE_BASE_URL }}
-          CONFLUENCE_USER_EMAIL: ${{ secrets.CONFLUENCE_USER_EMAIL }}
-          CONFLUENCE_API_TOKEN: ${{ secrets.CONFLUENCE_API_TOKEN }}
-          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          MDSPEC_TOKEN: ${{ secrets.MDSPEC_TOKEN }}
+          GITHUB_EVENT_BEFORE: ${{ github.event.before }}
 ```
 
 The `paths` filter means this only runs when ADR files change — not on every push to main.
@@ -187,27 +180,30 @@ docs/decisions/
     004-old-api-versioning.md
 ```
 
-Then map each subfolder to a different Confluence parent page:
+Then place a separate `.mdspecmap` in each subfolder pointing at a different Confluence parent:
 
+`docs/decisions/proposed/.mdspecmap`:
 ```yaml
-sources:
-  - path: docs/decisions/proposed/
-    destinations:
-      - type: confluence
-        space: ENG
-        parentPage: "ADRs — Proposed"
+version: 1
+mappings:
+  - integration: confluence
+    parent: alias:adrs-proposed
+```
 
-  - path: docs/decisions/accepted/
-    destinations:
-      - type: confluence
-        space: ENG
-        parentPage: "ADRs — Accepted"
+`docs/decisions/accepted/.mdspecmap`:
+```yaml
+version: 1
+mappings:
+  - integration: confluence
+    parent: alias:adrs-accepted
+```
 
-  - path: docs/decisions/deprecated/
-    destinations:
-      - type: confluence
-        space: ENG
-        parentPage: "ADRs — Deprecated"
+`docs/decisions/deprecated/.mdspecmap`:
+```yaml
+version: 1
+mappings:
+  - integration: confluence
+    parent: alias:adrs-deprecated
 ```
 
 Moving an ADR from `proposed/` to `accepted/` triggers a publish to the "Accepted" parent in Confluence. The folder structure becomes the Confluence hierarchy. This is more setup but produces a cleaner Confluence space for organizations that have many ADRs.

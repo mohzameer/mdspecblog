@@ -1,7 +1,7 @@
 ---
 title: "Why AI Agents Need Your Specs in Git, Not Locked in a SaaS (And How to Serve Them from S3)"
 description: "AI coding agents can't authenticate into your Confluence or Notion. They need specs at a URL they can reach. Here's the pattern for keeping a machine-readable copy current alongside your human-readable docs."
-pubDate: 2026-05-09
+pubDate: 2026-05-11
 author: "mdspec team"
 tags: ["AI Agents", "LLM", "Documentation", "S3", "GitHub Actions", "Cursor", "Claude"]
 readingTime: "8 min read"
@@ -61,25 +61,20 @@ Both come from the same source: the markdown file in your git repository. The CI
          └── S3: docs.yourcompany.com/specs/auth-service.md  (AI agents read)
 ```
 
-The `.mdspecmap` config declares all three destinations:
+The `.mdspecmap` config declares all three destinations. Place it in your `specs/` folder:
 
 ```yaml
 version: 1
-
-sources:
-  - path: specs/auth-service.md
-    destinations:
-      - type: confluence
-        space: ENG
-        parentPage: "Backend Services"
-      - type: notion
-        databaseId: "your-product-specs-db"
-        pageTitle: "Auth Service"
-      - type: s3
-        bucket: docs.yourcompany.com
-        key: specs/auth-service.md
-        acl: private  # or public-read if appropriate
+mappings:
+  - integration: confluence
+    parent: alias:backend-services
+  - integration: notion
+    parent: alias:product-specs
+  - integration: s3
+    parent: alias:docs-bucket
 ```
+
+Each `alias:` is a parent page or key-prefix alias configured in the mdspec dashboard. Connect each integration (Confluence, Notion, S3) in the dashboard once — credentials are stored there, not in your repo.
 
 One push to main. Three destinations updated. No manual copies.
 
@@ -125,18 +120,14 @@ Add to your repo's GitHub Secrets:
 **Updated GitHub Actions workflow:**
 
 ```yaml
-- uses: mdspec/publish@v1
-  with:
-    map: .mdspecmap
+- uses: actions/checkout@v4
+- run: npx mdspeci publish --project ${{ vars.MDSPEC_PROJECT_ID }}
   env:
-    CONFLUENCE_BASE_URL: ${{ secrets.CONFLUENCE_BASE_URL }}
-    CONFLUENCE_USER_EMAIL: ${{ secrets.CONFLUENCE_USER_EMAIL }}
-    CONFLUENCE_API_TOKEN: ${{ secrets.CONFLUENCE_API_TOKEN }}
-    NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-    AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-    AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    AWS_REGION: ${{ secrets.AWS_REGION }}
+    MDSPEC_TOKEN: ${{ secrets.MDSPEC_TOKEN }}
+    GITHUB_EVENT_BEFORE: ${{ github.event.before }}
 ```
+
+All destination credentials (Confluence, Notion, S3) are configured in the mdspec dashboard — only `MDSPEC_TOKEN` and the project ID are needed in GitHub.
 
 ---
 
@@ -243,21 +234,19 @@ This is the architectural answer to AI context debt: not a new process or a new 
 
 ## Getting Started
 
-If you already have mdspec publishing to Confluence or Notion, adding S3 is one block in your `.mdspecmap`:
+If you already have mdspec publishing to Confluence or Notion, adding S3 is one line in your `.mdspecmap`:
 
+`specs/.mdspecmap`:
 ```yaml
-sources:
-  - path: specs/auth-service.md
-    destinations:
-      - type: confluence       # existing
-        space: ENG
-        parentPage: "Backend Services"
-      - type: s3               # new
-        bucket: docs.yourcompany.com
-        key: specs/auth-service.md
+version: 1
+mappings:
+  - integration: confluence    # existing
+    parent: alias:backend-services
+  - integration: s3            # new
+    parent: alias:docs-bucket
 ```
 
-Add the AWS secrets, push, and your specs are on S3 within the next CI run.
+Connect your S3 bucket in the mdspec dashboard (Dashboard → Integrations → S3 → Connect), create a key-prefix alias, and push. Your specs will be on S3 within the next CI run.
 
 If you're starting from scratch, the [5-minute quickstart](/blog/mdspec-quickstart) covers the full setup — you can add S3 as a destination from the beginning.
 

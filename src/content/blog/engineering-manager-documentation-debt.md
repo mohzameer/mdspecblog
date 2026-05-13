@@ -1,7 +1,7 @@
 ---
 title: "The Engineering Manager's Playbook for Ending Documentation Debt"
 description: "Documentation debt isn't a culture problem — it's an architecture problem. Here's a practical framework for eliminating it: who owns the spec, what enforces freshness, and how to make publishing automatic."
-pubDate: 2026-05-09
+pubDate: 2026-04-29
 author: "mdspec team"
 tags: ["Engineering Management", "Documentation", "Documentation Debt", "Developer Workflow", "Technical Debt"]
 readingTime: "9 min read"
@@ -208,45 +208,42 @@ The right choice depends on your team's size and ownership model. For teams unde
 
 Once specs are in git and owned by the repository, the last step is automatic publishing. This is where [spec drift](/blog/spec-drift) — the progressive divergence between the spec in git and the copies people actually read in Confluence, Notion, and ClickUp — gets eliminated structurally.
 
-The tool is a `.mdspecmap` file at the repo root:
+Place `.mdspecmap` files in the folders you want to sync. Each file's location defines its scope, and each can route to different destinations.
 
+`specs/.mdspecmap`:
 ```yaml
 version: 1
-
-sources:
-  - path: specs/
-    destinations:
-      - type: confluence
-        space: ENG
-        parentPage: "Engineering Specs"
-
-  - path: docs/decisions/
-    destinations:
-      - type: confluence
-        space: ENG
-        parentPage: "Architecture Decisions"
-      - type: notion
-        databaseId: "your-adr-db-id"
-        pageTitle: auto
-
-  - path: specs/data-retention-policy.md
-    destinations:
-      - type: confluence
-        space: SEC
-        parentPage: "Compliance Documents"
+mappings:
+  - integration: confluence
+    parent: alias:engineering-specs
 ```
 
-A GitHub Actions step on push to main publishes everything:
+`docs/decisions/.mdspecmap`:
+```yaml
+version: 1
+mappings:
+  - integration: confluence
+    parent: alias:architecture-decisions
+  - integration: notion
+    parent: alias:adr-database
+```
+
+`specs/security/.mdspecmap` (or use `skip:` patterns to route specific files differently):
+```yaml
+version: 1
+mappings:
+  - integration: confluence
+    parent: alias:compliance-documents
+```
+
+Each `alias:` is configured once in the mdspec dashboard. A GitHub Actions step on push to main publishes everything:
 
 ```yaml
-- uses: mdspec/publish@v1
-  with:
-    map: .mdspecmap
+- uses: actions/checkout@v4
+- run: npx mdspeci publish --project ${{ vars.MDSPEC_PROJECT_ID }}
   env:
-    CONFLUENCE_BASE_URL: ${{ secrets.CONFLUENCE_BASE_URL }}
-    CONFLUENCE_USER_EMAIL: ${{ secrets.CONFLUENCE_USER_EMAIL }}
-    CONFLUENCE_API_TOKEN: ${{ secrets.CONFLUENCE_API_TOKEN }}
-    NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+    MDSPEC_TOKEN: ${{ secrets.MDSPEC_TOKEN }}
+    GITHUB_EVENT_BEFORE: ${{ github.event.before }}
 ```
 
 From the manager's perspective, this eliminates the supervision cost: you no longer need to check whether Confluence got updated, whether the Notion page is current, whether the ClickUp runbook reflects the latest incident procedure. The CI log tells you what was published, when. The Confluence page history tells you when it was last updated. Both are always correct.

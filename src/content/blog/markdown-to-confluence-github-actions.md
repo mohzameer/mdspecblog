@@ -1,7 +1,7 @@
 ---
 title: "Publish Markdown to Confluence with GitHub Actions in One Line: A 2026 Setup Guide"
 description: "A plain comparison of every real option for syncing markdown from GitHub to Confluence — mark, markdown-confluence, duo-labs, and mdspec — with a complete working setup you can copy today."
-pubDate: 2026-05-09
+pubDate: 2026-05-06
 author: "mdspec team"
 tags: ["Confluence", "GitHub Actions", "Markdown", "CI/CD", "Documentation"]
 readingTime: "11 min read"
@@ -83,33 +83,19 @@ Your content here.
 
 ### 4. mdspec (.mdspecmap approach)
 
-mdspec is the newest approach. Instead of per-file frontmatter or a single folder-level config, it uses a `.mdspecmap` file at the repo root that declares sources and destinations as a map.
+mdspec is the newest approach. Instead of per-file frontmatter or a single folder-level config, it uses a `.mdspecmap` file placed inside the folder you want to sync. Destination credentials are managed once in the mdspec dashboard — your CI workflow only needs one token.
 
-**How it works:** You define sources (individual files or folders) and destinations (Confluence, Notion, ClickUp, S3) in one config file. The GitHub Actions step reads the map and publishes everything on merge.
+**How it works:** You place a `.mdspecmap` in your specs folder declaring which integrations to publish to and which parent page alias to use. On merge, `npx mdspeci publish` detects changed files and syncs them. To route different subfolders to different destinations, place a separate `.mdspecmap` in each subfolder.
 
-**What the config looks like:**
+**What the config looks like** (`specs/.mdspecmap`):
 ```yaml
 version: 1
-
-sources:
-  - path: specs/auth-service.md
-    destinations:
-      - type: confluence
-        space: ENG
-        parentPage: "Backend Services"
-  
-  - path: specs/rate-limiting.md
-    destinations:
-      - type: confluence
-        space: ENG
-        parentPage: "Backend Services"
-
-  - path: docs/decisions/
-    destinations:
-      - type: confluence
-        space: ENG
-        parentPage: "Architecture Decisions"
+mappings:
+  - integration: confluence
+    parent: alias:backend-services
 ```
+
+The `alias:backend-services` is a parent page alias you configure once in the mdspec dashboard — it resolves to the Confluence space and parent page where specs should appear.
 
 **What it's good for:** Teams that want a clean config-file approach, multi-destination publishing, and no Confluence-specific markup in their markdown files.
 
@@ -142,41 +128,54 @@ The core tradeoff is between per-file control (mark, duo-labs) and config-level 
 
 Here's a complete working setup using mdspec. Prerequisites:
 
-- A Confluence Cloud or Data Center instance
+- A Confluence Cloud instance
 - An Atlassian API token (create one at [id.atlassian.com/manage-profile/security/api-tokens](https://id.atlassian.com/manage-profile/security/api-tokens))
 - A GitHub repo with markdown files you want to publish
 - GitHub Actions enabled
+- A free mdspec account at [mdspec.dev](https://mdspec.dev)
 
-### Step 1: Create your `.mdspecmap`
+### Step 1: Connect Confluence in the Dashboard
 
-Add a `.mdspecmap` file to the root of your repo. Start with one file and one destination — you can expand it once the basic flow is working.
+mdspec stores your Confluence credentials centrally — you configure them once in the dashboard and reference them by alias in your `.mdspecmap`.
+
+In the mdspec Dashboard: go to **Integrations → Confluence → Connect** and enter:
+- Your Confluence base URL (e.g. `https://yourcompany.atlassian.net`)
+- Your Atlassian account email
+- Your API token
+- Your space key (the short code in the space URL, e.g. `ENG`)
+
+Then create a **parent page alias**: name it something like `backend-services` and point it to the parent page where your specs should appear. This alias is what your `.mdspecmap` will reference.
+
+### Step 2: Create your `.mdspecmap`
+
+Place a `.mdspecmap` file in the folder you want to sync. The file's location determines its scope.
+
+`specs/.mdspecmap`:
 
 ```yaml
 version: 1
-
-sources:
-  - path: specs/auth-service.md
-    destinations:
-      - type: confluence
-        space: ENG
-        parentPage: "Backend Services"
-        pageTitle: "Auth Service"
+mappings:
+  - integration: confluence
+    parent: alias:backend-services
 ```
 
-A few notes on the config fields:
-- `space` is the Confluence space key (the short code in the space URL, like `ENG` or `BACKEND`)
-- `parentPage` is the title of the Confluence page you want to publish under — not an ID, so it won't break if pages move
-- `pageTitle` is what the Confluence page will be called. If you omit it, mdspec uses the markdown file's H1
+A few things worth noting:
+- `alias:backend-services` resolves to the parent page you configured in the dashboard — no inline space keys or page titles in the config
+- Everything in `specs/` and all its subfolders will be published
+- To route a subfolder to a different Confluence space, place a separate `.mdspecmap` inside that subfolder
 
-### Step 2: Add your secrets to GitHub
+### Step 3: Add your token to GitHub
 
-In your repo's Settings → Secrets and variables → Actions, add:
+In the mdspec Dashboard: **Project → Settings → Tokens** → generate a project token.
 
-- `CONFLUENCE_BASE_URL` — your Confluence instance URL (e.g. `https://yourcompany.atlassian.net`)
-- `CONFLUENCE_USER_EMAIL` — the email address associated with your Atlassian API token
-- `CONFLUENCE_API_TOKEN` — your Atlassian API token
+In your repo: **Settings → Secrets and variables → Actions**
 
-### Step 3: Add the GitHub Actions workflow
+| Name | Type | Value |
+|---|---|---|
+| `MDSPEC_TOKEN` | Secret | your project token |
+| `MDSPEC_PROJECT_ID` | Variable | your project ID (from Dashboard → Project → Settings → Overview) |
+
+### Step 4: Add the GitHub Actions workflow
 
 Create `.github/workflows/publish-specs.yml`:
 
@@ -190,26 +189,22 @@ on:
     paths:
       - 'specs/**'
       - 'docs/**'
-      - '.mdspecmap'
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
-      - uses: mdspec/publish@v1
-        with:
-          map: .mdspecmap
+
+      - run: npx mdspeci publish --project ${{ vars.MDSPEC_PROJECT_ID }}
         env:
-          CONFLUENCE_BASE_URL: ${{ secrets.CONFLUENCE_BASE_URL }}
-          CONFLUENCE_USER_EMAIL: ${{ secrets.CONFLUENCE_USER_EMAIL }}
-          CONFLUENCE_API_TOKEN: ${{ secrets.CONFLUENCE_API_TOKEN }}
+          MDSPEC_TOKEN: ${{ secrets.MDSPEC_TOKEN }}
+          GITHUB_EVENT_BEFORE: ${{ github.event.before }}
 ```
 
 The `paths` filter means the action only runs when spec files or the map itself changes — not on every push to main regardless of what changed.
 
-### Step 4: Run it once manually
+### Step 5: Run it once manually
 
 Before relying on the push trigger, run the workflow manually to verify everything is connected:
 
@@ -218,73 +213,54 @@ Before relying on the push trigger, run the workflow manually to verify everythi
 3. Check Confluence to confirm the page content matches your markdown file
 
 If the run fails, the most common issues are:
-- Wrong space key (check the URL of any page in your target space)
-- Parent page title doesn't match exactly (Confluence is case-sensitive on page titles)
+- Alias not found — the alias in `.mdspecmap` doesn't exist in your dashboard yet
 - API token doesn't have write permissions to the target space
+- Wrong space key entered when connecting Confluence in the dashboard
 
-### Step 5: Expand the map
+### Step 6: Expand the map
 
-Once the first file is publishing correctly, add more sources. You can add entire folders:
+Once the first file is publishing correctly, add more folders by placing additional `.mdspecmap` files.
+
+`specs/.mdspecmap` — all files in `specs/` → Backend Services:
 
 ```yaml
 version: 1
-
-sources:
-  - path: specs/auth-service.md
-    destinations:
-      - type: confluence
-        space: ENG
-        parentPage: "Backend Services"
-
-  - path: specs/
-    destinations:
-      - type: confluence
-        space: ENG
-        parentPage: "Service Specs"
-
-  - path: docs/decisions/
-    destinations:
-      - type: confluence
-        space: ENG
-        parentPage: "Architecture Decisions"
+mappings:
+  - integration: confluence
+    parent: alias:backend-services
 ```
 
-When you specify a folder, mdspec publishes all markdown files in that folder, using each file's H1 as the page title and creating pages under the specified parent.
+`docs/decisions/.mdspecmap` — ADRs → Architecture Decisions:
+
+```yaml
+version: 1
+mappings:
+  - integration: confluence
+    parent: alias:architecture-decisions
+```
+
+When you specify a folder via a `.mdspecmap` inside it, mdspec publishes all markdown files in that folder, using each file's H1 as the page title.
 
 ---
 
 ## Adding a Second Destination
 
-This is where the `.mdspecmap` approach has a concrete advantage over the single-destination tools: adding Notion or S3 as a second destination for the same file is one block in the config.
+The `.mdspecmap` approach makes adding Notion or S3 straightforward: add another mapping to the same config file.
+
+Connect each integration in the mdspec Dashboard first, then update `specs/.mdspecmap`:
 
 ```yaml
-sources:
-  - path: specs/auth-service.md
-    destinations:
-      - type: confluence
-        space: ENG
-        parentPage: "Backend Services"
-      - type: notion
-        databaseId: "your-notion-database-id"
-        pageTitle: "Auth Service Spec"
-      - type: s3
-        bucket: docs.yourcompany.com
-        key: specs/auth-service.md
+version: 1
+mappings:
+  - integration: confluence
+    parent: alias:backend-services
+  - integration: notion
+    parent: alias:product-specs
+  - integration: s3
+    parent: alias:docs-bucket
 ```
 
-Add the corresponding secrets:
-
-```yaml
-env:
-  CONFLUENCE_BASE_URL: ${{ secrets.CONFLUENCE_BASE_URL }}
-  CONFLUENCE_USER_EMAIL: ${{ secrets.CONFLUENCE_USER_EMAIL }}
-  CONFLUENCE_API_TOKEN: ${{ secrets.CONFLUENCE_API_TOKEN }}
-  NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-```
-
-One CI run now keeps three destinations synchronized: Confluence for engineering and security, Notion for product, and S3 for AI agents that need machine-readable specs. The markdown file in your repo is the single source of truth. [Spec drift](/blog/spec-drift) between destinations becomes structurally impossible — every destination is updated in the same CI run.
+One CI run now keeps all three destinations synchronized. The markdown file in your repo is the single source of truth. [Spec drift](/blog/spec-drift) between destinations becomes structurally impossible — every destination is updated in the same CI run.
 
 For Notion-specific details and workarounds for its limitations, see [Notion's GitHub Integration Is Read-Only](/blog/notion-github-integration-limitations).
 
@@ -298,7 +274,7 @@ If you already have Confluence pages that were manually maintained, you need to 
 
 **Option B: Reconcile first.** If the Confluence page has updates that were never back-propagated to git, pull those into the markdown file first, then run CI. The git version needs to be the canonical one before you start treating CI as the synchronization mechanism.
 
-**Option C: Publish to a new page.** If you want to leave the existing Confluence page untouched while you validate the pipeline, configure a different `parentPage` for the initial runs. Once you're confident the output looks right, point it at the real location.
+**Option C: Publish to a new page.** If you want to leave the existing Confluence page untouched while you validate the pipeline, configure a different alias pointing at a staging parent page for the initial runs. Once you're confident the output looks right, update the alias to the real location.
 
 Whichever option you choose, the important step afterward is making clear to your team that the git file is now the source of truth — not the Confluence page. If someone edits the Confluence page directly, the next CI run will overwrite their changes. That's the intended behavior (it enforces the single source of truth), but it needs to be communicated explicitly.
 
@@ -334,4 +310,4 @@ The non-quantifiable cost is more important: every manual update that doesn't ha
 
 ---
 
-*mdspec handles the `.mdspecmap` config, the multi-destination publishing, and the GitHub Actions step described in this guide. [Get started at mdspec.io](https://mdspec.io).*
+*mdspec handles the `.mdspecmap` config and the multi-destination publishing described in this guide. [Get started at mdspec.dev](https://mdspec.dev).*

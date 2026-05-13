@@ -1,7 +1,7 @@
 ---
 title: "Notion's GitHub Integration Is Read-Only: 5 Workarounds for Actually Publishing Markdown from Your Repo"
 description: "Notion's native GitHub integration can't push markdown content into Notion pages. Here are five real workarounds, ranked by how far they'll get you — with no hype about what each one actually can't do."
-pubDate: 2026-05-09
+pubDate: 2026-04-23
 author: "mdspec team"
 tags: ["Notion", "GitHub", "Markdown", "Integration", "Documentation"]
 readingTime: "9 min read"
@@ -137,37 +137,34 @@ requests.patch(
 
 **What it does:** Declares your markdown sources and Notion destinations in a single config file at the root of your repo. A GitHub Actions step reads the config and handles the conversion and API calls, including the markdown-to-Notion-blocks conversion that makes Workaround 4 hard.
 
+Place a `.mdspecmap` in the folder you want to sync, declaring the Notion integration and a parent page alias:
+
+`specs/.mdspecmap`:
 ```yaml
 version: 1
-
-sources:
-  - path: specs/auth-service.md
-    destinations:
-      - type: notion
-        databaseId: "your-database-id"
-        pageTitle: "Auth Service Spec"
-
-  - path: specs/rate-limiting.md
-    destinations:
-      - type: notion
-        databaseId: "your-database-id"
-        pageTitle: "Rate Limiting Policy"
-
-  - path: docs/decisions/
-    destinations:
-      - type: notion
-        databaseId: "adr-database-id"
-        pageTitle: auto
+mappings:
+  - integration: notion
+    parent: alias:product-specs
 ```
 
-The GitHub Actions step:
+`docs/decisions/.mdspecmap`:
+```yaml
+version: 1
+mappings:
+  - integration: notion
+    parent: alias:adr-database
+```
+
+Connect Notion in the mdspec dashboard (Dashboard → Integrations → Notion → Connect), enter your integration token, and create the parent page aliases pointing at your target databases or pages.
+
+The GitHub Actions step — only one secret needed:
 
 ```yaml
-- uses: mdspec/publish@v1
-  with:
-    map: .mdspecmap
+- uses: actions/checkout@v4
+- run: npx mdspeci publish --project ${{ vars.MDSPEC_PROJECT_ID }}
   env:
-    NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+    MDSPEC_TOKEN: ${{ secrets.MDSPEC_TOKEN }}
+    GITHUB_EVENT_BEFORE: ${{ github.event.before }}
 ```
 
 **When to use it:** You've outgrown Workaround 2 (too many files for a custom script), don't want the whole-repo mirror model of Workaround 3, and want to add Confluence or ClickUp alongside Notion without managing three separate integrations.
